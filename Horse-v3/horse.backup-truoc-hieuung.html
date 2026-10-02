@@ -568,134 +568,6 @@
             }
         }
 
-        /* Đếm ngược 3-2-1 */
-        #countdown {
-            position: absolute;
-            top: 55%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            font-family: 'Baloo 2', 'Roboto Condensed', sans-serif;
-            font-size: 170px;
-            font-weight: 800;
-            line-height: 1;
-            color: #FFD54F;
-            white-space: nowrap;
-            text-shadow: 6px 0 0 #263238, -6px 0 0 #263238, 0 6px 0 #263238, 0 -6px 0 #263238,
-                4px 4px 0 #263238, -4px -4px 0 #263238, 4px -4px 0 #263238, -4px 4px 0 #263238,
-                0 12px 0 rgba(38, 50, 56, 0.5);
-            pointer-events: none;
-            z-index: 160;
-        }
-
-        #countdown.go {
-            font-size: 110px;
-            color: #FF5252;
-        }
-
-        #countdown.show {
-            animation: cdPop 0.85s ease-out forwards;
-        }
-
-        @keyframes cdPop {
-            0% {
-                transform: translate(-50%, -50%) scale(2.2);
-                opacity: 0;
-            }
-
-            25% {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-            }
-
-            80% {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-            }
-
-            100% {
-                transform: translate(-50%, -50%) scale(0.85);
-                opacity: 0;
-            }
-        }
-
-        /* Quay chậm "photo finish": tối viền + nhãn nhấp nháy */
-        #gameStage::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 40;
-            box-shadow: inset 0 0 180px rgba(0, 0, 0, 0.6);
-            opacity: 0;
-            transition: opacity 0.4s;
-        }
-
-        #gameStage.slowmo::after {
-            opacity: 1;
-        }
-
-        #photo-finish {
-            position: absolute;
-            top: 104px;
-            left: 50%;
-            transform: translateX(-50%) scale(0);
-            background: #FF5252;
-            color: #fff;
-            font-family: 'Baloo 2', 'Roboto Condensed', sans-serif;
-            font-size: 26px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            padding: 4px 26px;
-            border: 3px solid #263238;
-            border-radius: 999px;
-            box-shadow: 4px 4px 0 rgba(38, 50, 56, 0.85);
-            text-shadow: 2px 2px 0 #263238;
-            pointer-events: none;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 65;
-        }
-
-        #gameStage.slowmo #photo-finish {
-            transform: translateX(-50%) scale(1);
-            animation: pfBlink 0.9s ease-in-out infinite;
-        }
-
-        @keyframes pfBlink {
-            50% {
-                opacity: 0.55;
-            }
-        }
-
-        /* Công bố kết quả từng hạng */
-        .wl-item.wl-hidden {
-            background: #ECE7F6;
-        }
-
-        .wl-item.wl-hidden .wl-name {
-            color: #A79FC0;
-            letter-spacing: 4px;
-        }
-
-        .wl-item.wl-reveal {
-            animation: wlReveal 0.5s cubic-bezier(0.17, 0.89, 0.32, 1.28);
-        }
-
-        .wl-top1.wl-reveal {
-            box-shadow: 0 0 0 3px #FFD54F, 0 0 26px rgba(255, 193, 7, 0.85);
-        }
-
-        @keyframes wlReveal {
-            0% {
-                transform: scale(0.6);
-                opacity: 0.2;
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
         /* Scenario Alert */
         #scenario-alert {
             position: absolute;
@@ -958,10 +830,6 @@
                 <div id="rank-list">---</div>
             </div>
 
-            <!-- Đếm ngược + nhãn quay chậm -->
-            <div id="countdown"></div>
-            <div id="photo-finish">📸 PHOTO FINISH</div>
-
             <!-- Bình luận viên -->
             <div id="commentary">
                 <div class="mic">🎤</div>
@@ -986,7 +854,7 @@
                     <div id="win-list"></div>
                     <img id="win-prize-img" src=""
                         style="display:none; width: 160px; height: 160px; object-fit: contain; margin-top: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); border-radius: 15px; padding: 10px; background: white;">
-                    <button class="btn-action btn-start" id="win-next-btn" onclick="resetGame()"
+                    <button class="btn-action btn-start" onclick="resetGame()"
                         style="margin-top: 20px; font-size:14px; padding:10px;">ĐUA VÁN MỚI</button>
                 </div>
             </div>
@@ -1034,17 +902,6 @@
         }, { once: true });
 
         let fireworksInterval = null;
-
-        // Bộ đệm tiếng ồn trắng dùng chung cho các hiệu ứng âm thanh
-        let noiseBuffer = null;
-        function getNoiseBuffer() {
-            if (!noiseBuffer) {
-                noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
-                const data = noiseBuffer.getChannelData(0);
-                for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-            }
-            return noiseBuffer;
-        }
 
         function playSound(type) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -1101,75 +958,6 @@
 
                     noise.start(t);
                 }
-            } else if (type === 'beep') {
-                // Tiếng bíp đếm ngược
-                const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-                o.connect(g); g.connect(audioCtx.destination);
-                o.type = 'square'; o.frequency.value = 660;
-                g.gain.setValueAtTime(0.18, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-                o.start(now); o.stop(now + 0.25);
-            } else if (type === 'go') {
-                // Tiếng "XUẤT PHÁT" + còi
-                [880, 1320].forEach((f, i) => {
-                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-                    o.connect(g); g.connect(audioCtx.destination);
-                    o.type = 'square'; o.frequency.value = f;
-                    g.gain.setValueAtTime(0.15, now + i * 0.12); g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.5);
-                    o.start(now + i * 0.12); o.stop(now + i * 0.12 + 0.5);
-                });
-                playSound('whistle');
-            } else if (type === 'clop') {
-                // Tiếng vó ngựa: tiếng gõ ngắn + tiếng "thịch" trầm
-                const src = audioCtx.createBufferSource(); src.buffer = getNoiseBuffer();
-                const bp = audioCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 700 + Math.random() * 700; bp.Q.value = 4;
-                const g = audioCtx.createGain();
-                src.connect(bp); bp.connect(g); g.connect(audioCtx.destination);
-                g.gain.setValueAtTime(0.35, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-                src.start(now, Math.random() * 1.5, 0.08);
-                const o = audioCtx.createOscillator(); const g2 = audioCtx.createGain();
-                o.connect(g2); g2.connect(audioCtx.destination);
-                o.type = 'sine'; o.frequency.setValueAtTime(140, now); o.frequency.exponentialRampToValueAtTime(60, now + 0.08);
-                g2.gain.setValueAtTime(0.12, now); g2.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
-                o.start(now); o.stop(now + 0.1);
-            } else if (type === 'cheer') {
-                // Tiếng khán giả reo hò (tiếng ồn đám đông + vài tiếng huýt "ú ù")
-                [[1100, 0.7, 0.35], [450, 0.9, 0.25]].forEach(([freq, q, vol]) => {
-                    const src = audioCtx.createBufferSource(); src.buffer = getNoiseBuffer(); src.loop = true;
-                    const bp = audioCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = q;
-                    const g = audioCtx.createGain();
-                    src.connect(bp); bp.connect(g); g.connect(audioCtx.destination);
-                    g.gain.setValueAtTime(0.001, now); g.gain.exponentialRampToValueAtTime(vol, now + 0.4);
-                    g.gain.setValueAtTime(vol, now + 2.0); g.gain.exponentialRampToValueAtTime(0.001, now + 3.6);
-                    src.start(now); src.stop(now + 3.7);
-                });
-                for (let i = 0; i < 7; i++) {
-                    const t = now + 0.2 + Math.random() * 1.8, base = 600 + Math.random() * 700;
-                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-                    o.connect(g); g.connect(audioCtx.destination);
-                    o.type = 'triangle';
-                    o.frequency.setValueAtTime(base, t); o.frequency.linearRampToValueAtTime(base * 1.5, t + 0.25); o.frequency.linearRampToValueAtTime(base * 0.9, t + 0.6);
-                    g.gain.setValueAtTime(0.001, t); g.gain.linearRampToValueAtTime(0.035, t + 0.08); g.gain.exponentialRampToValueAtTime(0.001, t + 0.65);
-                    o.start(t); o.stop(t + 0.7);
-                }
-            } else if (type === 'shutter') {
-                // Tiếng chụp ảnh (2 tiếng tách)
-                [0, 0.07].forEach(dt => {
-                    const src = audioCtx.createBufferSource(); src.buffer = getNoiseBuffer();
-                    const hp = audioCtx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2500;
-                    const g = audioCtx.createGain();
-                    src.connect(hp); hp.connect(g); g.connect(audioCtx.destination);
-                    g.gain.setValueAtTime(0.3, now + dt); g.gain.exponentialRampToValueAtTime(0.001, now + dt + 0.05);
-                    src.start(now + dt, Math.random(), 0.06);
-                });
-            } else if (type === 'reveal') {
-                // Tiếng "ting" khi mở từng hạng
-                [1046, 1568].forEach((f, i) => {
-                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-                    o.connect(g); g.connect(audioCtx.destination);
-                    o.type = 'sine'; o.frequency.value = f;
-                    g.gain.setValueAtTime(0.2, now + i * 0.08); g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.6);
-                    o.start(now + i * 0.08); o.stop(now + i * 0.08 + 0.6);
-                });
             } else if (type === 'win') {
                 let f = [523, 659, 784, 1046];
                 f.forEach((freq, i) => {
@@ -1241,15 +1029,6 @@
         let cameraX = 0;
         let globalTimer = 0;
         let flashOpacity = 0;
-
-        // Quay chậm "photo finish" + đồng hồ cuộc đua (chạy chậm theo timeScale)
-        const SLOWMO_FACTOR = 0.35;  // tốc độ khi quay chậm (35%)
-        const SLOWMO_ZONE = 280;     // px: con dẫn đầu cách vạch đích chừng này thì bắt đầu quay chậm (~28m)
-        const SLOWMO_MAX_MS = 5000;  // quay chậm tối đa 5 giây
-        const SLOWMO_BUDGET = 3;     // giây: trừ trước vào lịch chạy để tổng thời gian vẫn khớp thời gian đã đặt
-        let timeScale = 1, raceClock = 0, lastFrameAt = 0;
-        let slowMoStart = 0, slowMoDone = false, lastFinishAt = 0;
-        let countingDown = false, nextClopAt = 0;
 
         // --- DATA MANAGEMENT (From V2) ---
         let prizes = [];
@@ -1403,7 +1182,7 @@
             }
 
             ENGINE.update(engine, 1000 / 60);
-            globalTimer += 0.1 * timeScale;
+            globalTimer += 0.1;
             if (flashOpacity > 0) flashOpacity -= 0.02;
 
             let leaderX = 0;
@@ -1413,36 +1192,21 @@
                 // Dust
                 for (let i = dusts.length - 1; i >= 0; i--) {
                     let d = dusts[i];
-                    d.x += d.vx * timeScale; d.y += d.vy * timeScale; d.life -= 0.04 * timeScale; d.size += 0.3 * timeScale;
+                    d.x += d.vx; d.y += d.vy; d.life -= 0.04; d.size += 0.3;
                     if (d.life <= 0) dusts.splice(i, 1);
                 }
 
                 // Update Horses
                 const progress = Math.max(0, Math.min(1, (leaderX - START_LINE) / (FINISH_LINE - START_LINE)));
 
-                // Đồng hồ cuộc đua: chạy chậm lại khi quay chậm
-                const nowMs = Date.now();
-                const dtReal = lastFrameAt ? Math.min(100, nowMs - lastFrameAt) : 1000 / 60;
-                lastFrameAt = nowMs;
-                raceClock += dtReal * timeScale / 1000;
-                updateSlowMo(leaderX, nowMs);
-
-                // Tiếng vó ngựa (nhịp chậm lại khi quay chậm)
-                if (nowMs >= nextClopAt) {
-                    playSound('clop');
-                    nextClopAt = nowMs + (85 + Math.random() * 70) / Math.max(SLOWMO_FACTOR, timeScale);
-                }
-
                 // Canh giờ: ngựa đang giữ hạng TOP_N phải về đích đúng raceTime giây => cả đàn tăng/giảm tốc cùng lúc
                 raceFrames++;
-                const elapsed = raceClock;
-                const realElapsed = (nowMs - startTime) / 1000;
-                const paceTime = raceTime > 15 ? raceTime - SLOWMO_BUDGET : raceTime;
+                const elapsed = (Date.now() - startTime) / 1000;
                 const ranked = [...finishers, ...ducks.filter(d => !d.finished).sort((a, b) => b.body.position.x - a.body.position.x)];
                 const pacer = ranked[winnersNeeded - 1];
                 if (pacer && !pacer.finished) {
-                    const plannedX = START_LINE + (FINISH_LINE - START_LINE) * plannedProgress(elapsed / paceTime);
-                    const frameScale = raceFrames > 30 ? Math.max(0.2, Math.min(1.5, (realElapsed * 60) / raceFrames)) : 1; // 120Hz => 0.5
+                    const plannedX = START_LINE + (FINISH_LINE - START_LINE) * plannedProgress(elapsed / raceTime);
+                    const frameScale = raceFrames > 30 ? Math.max(0.2, Math.min(1.5, (elapsed * 60) / raceFrames)) : 1; // 120Hz => 0.5
                     const wanted = frameScale * Math.max(0.4, Math.min(2.5, 1 + (plannedX - pacer.body.position.x) * 0.002));
                     paceMult += (wanted - paceMult) * 0.05;
                 }
@@ -1492,7 +1256,7 @@
                         // Bám đuổi: tụt quá CATCHUP_FREE so với ngựa dẫn đầu thì càng xa càng được tăng tốc
                         let gapToLeader = Math.max(0, leaderX - dX - CATCHUP_FREE);
                         targetSpeed *= 1 + Math.min(gapToLeader / CATCHUP_RANGE, 1) * CATCHUP_MAX;
-                        targetSpeed *= paceMult * timeScale; // canh giờ kết thúc + quay chậm
+                        targetSpeed *= paceMult; // canh giờ kết thúc
 
                         let currentVx = d.body.velocity.x;
                         let newVx = currentVx + (targetSpeed - currentVx) * 0.05;
@@ -1576,14 +1340,11 @@
                 newFinishers.forEach(d => {
                     d.finished = true; finishers.push(d);
                     announce(`<b>${esc(horseName(d))}</b> về đích thứ ${finishers.length}!`, true);
-                    lastFinishAt = Date.now();
-                    if (finishers.length === 1) playSound('cheer');
-                    if (timeScale < 0.9) { flashOpacity = 0.7; playSound('shutter'); } // đèn flash chụp ảnh khi quay chậm
                 });
                 if (finishers.length >= winnersNeeded) endGame(finishers.slice(0, winnersNeeded));
             }
             // Hết giờ (dự phòng): quá thời gian đã đặt 3 giây mà chưa đủ ngựa về đích thì lấy theo vị trí hiện tại
-            if (isRacing && raceClock > raceTime + 3) {
+            if (isRacing && (Date.now() - startTime) / 1000 > raceTime + 3) {
                 const ranked = [...finishers, ...ducks.filter(d => !d.finished).sort((a, b) => b.body.position.x - a.body.position.x)];
                 endGame(ranked.slice(0, winnersNeeded));
             }
@@ -1730,7 +1491,7 @@
                     l.y = TOP_MARGIN + 15 + Math.random() * (height - TOP_MARGIN - 30);
                     l.len = 60 + Math.random() * 160; l.spd = 18 + Math.random() * 16; l.w = 1.5 + Math.random() * 2.5;
                 }
-                l.x -= l.spd * timeScale;
+                l.x -= l.spd;
                 ctx.lineWidth = l.w;
                 ctx.beginPath(); ctx.moveTo(cameraX + l.x, l.y); ctx.lineTo(cameraX + l.x + l.len, l.y); ctx.stroke();
             }
@@ -1953,77 +1714,9 @@
             }
         }
 
-        // Quay chậm "photo finish": con dẫn đầu sát vạch đích -> chậm lại tới khi con đầu tiên về đích (+1,2 giây)
-        function updateSlowMo(leaderX, nowMs) {
-            const need = 1;
-            const stage = document.getElementById('gameStage');
-            if (!slowMoStart && !slowMoDone && leaderX >= FINISH_LINE - SLOWMO_ZONE && finishers.length < need) {
-                slowMoStart = nowMs;
-                stage.classList.add('slowmo');
-                announce("Gay cấn quá! Các chú ngựa sắp về đích!", true);
-            }
-            if (slowMoStart && !slowMoDone &&
-                ((finishers.length >= need && nowMs - lastFinishAt > 1200) || nowMs - slowMoStart > SLOWMO_MAX_MS)) {
-                slowMoDone = true;
-                stage.classList.remove('slowmo');
-            }
-            const target = (slowMoStart && !slowMoDone) ? SLOWMO_FACTOR : 1;
-            timeScale += (target - timeScale) * 0.08; // chuyển chậm/nhanh mượt
-        }
-
-        // Đếm ngược 3-2-1-XUẤT PHÁT!
-        function runCountdown(onGo) {
-            countingDown = true;
-            const el = document.getElementById('countdown');
-            const steps = ['3', '2', '1', 'XUẤT PHÁT!'];
-            steps.forEach((txt, i) => setTimeout(() => {
-                el.textContent = txt;
-                el.classList.toggle('go', i === steps.length - 1);
-                el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
-                if (i < steps.length - 1) {
-                    playSound('beep');
-                } else {
-                    playSound('go');
-                    countingDown = false;
-                    onGo();
-                }
-            }, 700 + i * 900));
-        }
-
-        // Công bố kết quả từng hạng: từ hạng cuối lên hạng 1 (MC bấm nút hoặc Space / Enter / →)
-        let revealQueue = [];
-        function revealNext() {
-            const btn = document.getElementById('win-next-btn');
-            const item = revealQueue.pop();
-            if (!item) { resetGame(); return; }
-            item.classList.remove('wl-hidden');
-            item.classList.add('wl-reveal');
-            item.querySelector('.wl-name').textContent = item.dataset.name;
-            const rank = +item.dataset.rank;
-            if (rank === 1) {
-                playSound('win');
-                playSound('fireworks_start');
-                confetti({ particleCount: 250, spread: 110, origin: { y: 0.6 }, colors: ['#ffd700', '#ffffff', '#388e3c'] });
-            } else {
-                playSound('reveal');
-                if (rank <= 3) confetti({ particleCount: 80, spread: 70, origin: { y: 0.65 } });
-            }
-            if (revealQueue.length === 0) btn.textContent = 'ĐUA VÁN MỚI';
-            else if (revealQueue.length === 1) btn.textContent = '👑 CÔNG BỐ HẠNG 1';
-            else btn.textContent = `🎉 CÔNG BỐ HẠNG ${revealQueue[revealQueue.length - 1].dataset.rank}`;
-        }
-
-        window.addEventListener('keydown', e => {
-            if (document.getElementById('winner-screen').style.display !== 'flex') return;
-            if (document.activeElement && document.activeElement.id === 'win-next-btn') return; // để nút tự xử lý
-            if (revealQueue.length && (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowRight')) {
-                e.preventDefault();
-                revealNext();
-            }
-        });
-
         function startGame() {
-            if (isRacing || countingDown) return;
+            if (isRacing) return;
+            playSound('whistle');
 
             // Auto-hide Controls Panel
             document.querySelector('.controls-panel').style.display = 'none';
@@ -2051,6 +1744,7 @@
             let qty = parseInt(document.getElementById('inp-qty').value);
             let time = Math.max(10, Math.min(300, parseInt(document.getElementById('inp-time').value) || 30)); // Thời gian kết thúc (giây) đặt ở bảng điều khiển
             raceTime = time; paceMult = 1; raceFrames = 0;
+            resetCommentary();
             try { localStorage.setItem('horse_v3_time', time); } catch (e) { }
             // Calculate avg speed based on time
             let avgSpeed = (FINISH_LINE - START_LINE) / (time * 60);
@@ -2138,15 +1832,9 @@
             let wallBot = BODIES.rectangle(MAP_LENGTH / 2, height + 50, MAP_LENGTH + 2000, 100, { isStatic: true });
             COMPOSITE.add(world, [wallTop, wallBot]);
 
+            isRacing = true;
             document.getElementById('winner-screen').style.display = 'none';
-            announce("Các chú ngựa đã vào vị trí xuất phát...", true);
-            runCountdown(() => {
-                isRacing = true;
-                startTime = Date.now();
-                raceClock = 0; lastFrameAt = 0; timeScale = 1;
-                slowMoStart = 0; slowMoDone = false; lastFinishAt = 0; nextClopAt = 0;
-                resetCommentary();
-            });
+            startTime = Date.now();
             // requestAnimationFrame(loop); // REMOVED: Loop is already running globally
         }
 
@@ -2201,11 +1889,11 @@
             isRacing = false;
             announce(`Cuộc đua kết thúc! Chúc mừng TOP ${topList.length}!`, true);
             const winner = topList[0];
-            document.getElementById('gameStage').classList.remove('slowmo');
-            playSound('reveal');
+            playSound('win');
+            playSound('fireworks_start'); // Trigger fireworks sound
             document.getElementById('winner-screen').style.display = 'flex';
+            confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: ['#ffd700', '#ffffff', '#388e3c'] });
             drawWinnerAvatar(winner);
-            // Pháo hoa + pháo giấy để dành lúc công bố hạng 1 (xem revealNext)
 
             // Deduct Prize
             // Deduct Prize
@@ -2247,18 +1935,10 @@
                 rankEl.innerText = i + 1;
                 const nameEl = document.createElement('span');
                 nameEl.className = 'wl-name';
-                nameEl.innerText = '? ? ?'; // ẩn tên, MC mở dần từng hạng
-                item.dataset.name = d.participant.name || ("Ngựa " + d.id);
-                item.dataset.rank = i + 1;
-                item.classList.add('wl-hidden');
+                nameEl.innerText = d.participant.name || ("Ngựa " + d.id);
                 item.append(rankEl, nameEl);
                 listEl.appendChild(item);
             });
-            revealQueue = Array.from(listEl.children); // pop() lấy hạng cuối trước
-            const nextBtn = document.getElementById('win-next-btn');
-            nextBtn.onclick = revealNext;
-            nextBtn.style.fontSize = '18px'; nextBtn.style.padding = '14px';
-            nextBtn.textContent = revealQueue.length > 1 ? `🎉 CÔNG BỐ HẠNG ${revealQueue.length}` : '👑 CÔNG BỐ HẠNG 1';
 
             // 4. Prize Image
             const prizeImg = document.getElementById('win-prize-img');
