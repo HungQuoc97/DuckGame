@@ -271,32 +271,6 @@
             box-shadow: 0 5px 12px rgba(99, 102, 241, 0.4);
         }
 
-        /* Nút Xóa Cache (lịch sử trúng giải) */
-        .btn-clear-cache {
-            background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            min-width: 90px;
-            flex: 1; /* cao bằng 2 hàng nút Import + Xem DS bên cạnh */
-            box-shadow: 0 3px 8px rgba(220, 38, 38, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            transition: all 0.2s;
-        }
-
-        .btn-clear-cache:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 12px rgba(220, 38, 38, 0.4);
-        }
-
         /* --- MODAL QUẢN LÝ DỮ LIỆU --- */
         .modal-overlay {
             position: fixed;
@@ -561,13 +535,6 @@
                     <input type="file" id="csvPrize" accept=".csv, .xlsx, .xls">
                     <button class="btn-view-list" onclick="manageData('prize')">
                         <i class="fa-solid fa-gift"></i> Xem DS Quà
-                    </button>
-                </div>
-
-                <div class="admin-group">
-                    <button class="btn-clear-cache" onclick="clearWinnersCache()"
-                        title="Xóa lịch sử trúng giải và đưa người đã trúng về lại danh sách tham gia">
-                        <i class="fa-solid fa-broom"></i> Xóa Cache
                     </button>
                 </div>
             </div>
@@ -896,47 +863,6 @@
                 currentData = [];
                 renderTable();
             }
-        }
-
-        // Xóa cache kết quả: xóa lịch sử trúng giải + đưa người đã trúng về lại danh sách tham gia (danh sách quà giữ nguyên)
-        // Trả về số người được đưa về; -1 nếu bấm Hủy; -2 nếu chưa có ai trúng giải
-        function restoreWinnersToParticipants() {
-            let winners = [], participants = [];
-            try { winners = JSON.parse(localStorage.getItem('lucky_draw_winners') || '[]'); } catch (e) { }
-            try { participants = JSON.parse(localStorage.getItem('lucky_draw_participants') || '[]'); } catch (e) { }
-            if (!Array.isArray(winners)) winners = [];
-            if (!Array.isArray(participants)) participants = [];
-            if (winners.length === 0) return -2;
-            if (!confirm(`Xóa lịch sử ${winners.length} lượt trúng giải và đưa người đã trúng trở lại danh sách tham gia?\n(Danh sách quà giữ nguyên)`)) return -1;
-
-            const norm = v => String(v || '').trim();
-            const ids = new Set(participants.map(p => norm(p.id)).filter(Boolean));
-            const names = new Set(participants.map(p => norm(p.name)).filter(Boolean));
-            let restored = 0;
-            winners.forEach(w => {
-                let name = norm(w.name), id = norm(w.id);
-                // Có game lưu ngược Tên/Mã NV (giống xử lý ở trang Kết Quả): tên bắt đầu bằng YEG => đảo lại
-                if (name.toUpperCase().startsWith('YEG')) [name, id] = [id, name];
-                // Ngựa/Vịt không gắn người tham gia (VD "Ngựa 7", "Vịt #3") => bỏ qua
-                if (!id && /^(Ngựa |Vịt #)\d+$/.test(name)) return;
-                if (!name && !id) return;
-                if (id ? ids.has(id) : names.has(name)) return; // đã có trong danh sách
-                participants.push({ stt: participants.length + 1, name, id });
-                if (id) ids.add(id);
-                if (name) names.add(name);
-                restored++;
-            });
-            localStorage.setItem('lucky_draw_participants', JSON.stringify(participants));
-            localStorage.removeItem('lucky_draw_winners');
-            return restored;
-        }
-
-        function clearWinnersCache() {
-            const restored = restoreWinnersToParticipants();
-            if (restored === -2) { showToast('Chưa có lịch sử trúng giải nào để xóa.', 'info'); return; }
-            if (restored < 0) return;
-            showToast(`🧹 Đã xóa cache kết quả, đưa ${restored} người về lại danh sách tham gia`, 'success');
-            checkGameLock();
         }
 
         function saveCurrentData() {

@@ -732,6 +732,8 @@
 
                 <button class="btn-action btn-start" id="btn-start" onclick="startGame()">🏁 BẮT ĐẦU</button>
                 <button class="btn-action btn-reset" id="btn-reset" onclick="resetGame()">🔄 LÀM MỚI</button>
+                <button class="btn-action btn-reset" id="btn-clear-cache" onclick="clearWinnersCache()"
+                    title="Xóa lịch sử trúng giải và đưa người đã trúng về lại danh sách tham gia">🧹 XÓA CACHE</button>
 
                 <a href="../index.html" class="btn-nav-bottom">
                     ⬅ QUAY VỀ MENU
@@ -1594,6 +1596,48 @@
             document.getElementById('winner-screen').style.display = 'none';
             startTime = Date.now();
             // requestAnimationFrame(loop); // REMOVED: Loop is already running globally
+        }
+
+        // Xóa cache kết quả: xóa lịch sử trúng giải + đưa người đã trúng về lại danh sách tham gia (danh sách quà giữ nguyên)
+        // Trả về số người được đưa về; -1 nếu bấm Hủy; -2 nếu chưa có ai trúng giải
+        function restoreWinnersToParticipants() {
+            let winners = [], participants = [];
+            try { winners = JSON.parse(localStorage.getItem('lucky_draw_winners') || '[]'); } catch (e) { }
+            try { participants = JSON.parse(localStorage.getItem('lucky_draw_participants') || '[]'); } catch (e) { }
+            if (!Array.isArray(winners)) winners = [];
+            if (!Array.isArray(participants)) participants = [];
+            if (winners.length === 0) return -2;
+            if (!confirm(`Xóa lịch sử ${winners.length} lượt trúng giải và đưa người đã trúng trở lại danh sách tham gia?\n(Danh sách quà giữ nguyên)`)) return -1;
+
+            const norm = v => String(v || '').trim();
+            const ids = new Set(participants.map(p => norm(p.id)).filter(Boolean));
+            const names = new Set(participants.map(p => norm(p.name)).filter(Boolean));
+            let restored = 0;
+            winners.forEach(w => {
+                let name = norm(w.name), id = norm(w.id);
+                // Có game lưu ngược Tên/Mã NV (giống xử lý ở trang Kết Quả): tên bắt đầu bằng YEG => đảo lại
+                if (name.toUpperCase().startsWith('YEG')) [name, id] = [id, name];
+                // Ngựa/Vịt không gắn người tham gia (VD "Ngựa 7", "Vịt #3") => bỏ qua
+                if (!id && /^(Ngựa |Vịt #)\d+$/.test(name)) return;
+                if (!name && !id) return;
+                if (id ? ids.has(id) : names.has(name)) return; // đã có trong danh sách
+                participants.push({ stt: participants.length + 1, name, id });
+                if (id) ids.add(id);
+                if (name) names.add(name);
+                restored++;
+            });
+            localStorage.setItem('lucky_draw_participants', JSON.stringify(participants));
+            localStorage.removeItem('lucky_draw_winners');
+            return restored;
+        }
+
+        function clearWinnersCache() {
+            if (isRacing) return;
+            const restored = restoreWinnersToParticipants();
+            if (restored === -2) { alert('Chưa có lịch sử trúng giải nào để xóa.'); return; }
+            if (restored < 0) return;
+            alert(`Đã xóa cache kết quả, đưa ${restored} người về lại danh sách tham gia.`);
+            location.reload(); // cập nhật lại số ngựa theo danh sách mới
         }
 
         function resetGame() {
