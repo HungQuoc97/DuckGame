@@ -1782,7 +1782,7 @@
             ducks.forEach(d => {
                 const x = d.body.position.x;
                 const y = d.body.position.y + d.gallopOffset - 44;
-                const label = personName(d.participant) || String(d.id);
+                const label = String(d.participant && d.participant.id ? d.participant.id : d.id);
                 const rank = d.finished ? finishers.indexOf(d) + 1 : 0;
                 const crowned = rank === 1 || (isRacing && finishers.length === 0 && d === leader);
                 ctx.save(); ctx.translate(x, y);
@@ -1913,23 +1913,7 @@
         // ===== BÌNH LUẬN VIÊN =====
         let lastAnnounce = 0, lastLeaderId = null, announcedHalf = false, announcedSprint = false;
         const esc = v => String(v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-        // Họ tên / Mã NV: file nhập kiểu "STT | Họ tên | Mã NV" bị lưu đảo (name = mã, id = họ tên) -> tự nhận diện
-        let namesSwapped = false; // true khi đa số danh sách bị đảo cột (tính lúc bắt đầu ván)
-        function looksLikeCode(v) { v = String(v || '').trim(); return !!v && !/\s/.test(v) && (/\d/.test(v) || /^[A-Z]{2,}$/.test(v)); }
-        function detectSwapped(list) {
-            let codeInName = 0, codeInId = 0;
-            list.forEach(p => { if (looksLikeCode(p && p.name)) codeInName++; if (looksLikeCode(p && p.id)) codeInId++; });
-            return codeInName > codeInId;
-        }
-        function splitPerson(p) {
-            const n = String((p && p.name) || '').trim(), i = String((p && p.id) || '').trim();
-            if (looksLikeCode(n) && !looksLikeCode(i)) return { name: i || n, code: n };  // bị đảo
-            if (looksLikeCode(i) && !looksLikeCode(n)) return { name: n || i, code: i };  // đúng chiều
-            return namesSwapped ? { name: i || n, code: i ? n : '' } : { name: n || i, code: n ? i : '' }; // không rõ -> theo cả danh sách
-        }
-        function personName(p) { return splitPerson(p).name; }
-        function personCode(p) { return splitPerson(p).code; }
-        function horseName(d) { return personName(d.participant) || ("Ngựa " + d.id); }
+        function horseName(d) { return (d.participant && d.participant.name) ? d.participant.name : ("Ngựa " + d.id); }
 
         function announce(html, force) {
             const now = Date.now();
@@ -2100,8 +2084,6 @@
                     });
                     // --------------------------
 
-                    namesSwapped = detectSwapped(participants);
-
                     // Shuffle
                     for (let i = participants.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
@@ -2266,7 +2248,7 @@
                 const nameEl = document.createElement('span');
                 nameEl.className = 'wl-name';
                 nameEl.innerText = '? ? ?'; // ẩn tên, MC mở dần từng hạng
-                item.dataset.name = horseName(d);
+                item.dataset.name = d.participant.name || ("Ngựa " + d.id);
                 item.dataset.rank = i + 1;
                 item.classList.add('wl-hidden');
                 item.append(rankEl, nameEl);
@@ -2294,8 +2276,8 @@
             for (let i = topList.length - 1; i >= 0; i--) {
                 const w = topList[i];
                 winners.push({
-                    name: horseName(w),
-                    id: personCode(w.participant),
+                    name: w.participant.name || ("Ngựa " + w.id),
+                    id: w.participant.id || "",
                     prize: prizeName,
                     prizeItem: prizeItem,
                     rank: i + 1,
@@ -2353,7 +2335,7 @@
                     let stratName = STRATEGIES[d.strategy].name;
                     let stratColor = STRATEGIES[d.strategy].color;
                     html += `<div class="r-item">
-                        <span class="${i === 0 ? 'r-1' : ''}">${d.finished ? '🏁 ' : ''}${i + 1}. ${esc(horseName(d))}${personCode(d.participant) ? ' - ' + esc(personCode(d.participant)) : ''}</span>
+                        <span class="${i === 0 ? 'r-1' : ''}">${d.finished ? '🏁 ' : ''}${i + 1}. ${(d.participant && d.participant.id ? d.participant.id : d.id)} - ${d.participant && d.participant.name ? d.participant.name : ""}</span>
                         <span class="strat-tag" style="background:${stratColor}">${stratName}</span>
                     </div>`;
                 }
