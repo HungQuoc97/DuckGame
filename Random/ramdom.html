@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Draw Pro - Random</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&family=Playfair+Display:ital,wght@1,700&family=Anton&display=swap"
+        rel="stylesheet">
+    <link rel="icon" href="../images.png" type="image/x-icon">
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --tet-red: #D32F2F;
+            --tet-gold: #FFD700;
+            --tet-yellow: #FFEB3B;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-light: #ffffff;
+            --text-dim: #dddddd;
+
+            /* Existing Random Vars */
+            --gold-text: linear-gradient(45deg, #FFD700, #FDB931, #FFD700);
+            --gold-border: #FFD700;
+            --btn-red: #d32f2f;
+            --btn-red-dark: #b71c1c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Roboto Condensed', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+        }
+
+        /* Background: Full-screen festive Tet background */
+        .bg-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("../FINAL.jpg");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        /* Lớp phủ màu tím lên trên ảnh nền */
+        .bg-image::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 107, 107, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(241, 196, 15, 0.2) 0%, transparent 50%),
+                linear-gradient(135deg, rgba(113, 0, 209, 0.15) 0%, rgba(188, 86, 252, 0.25) 100%);
+            z-index: 0;
+            pointer-events: none;
+            animation: gradientShift 10s ease infinite;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        /* --- CLOUDS ANIMATION --- */
+        .clouds-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 100px;
+            filter: blur(20px);
+            animation: floatCloud linear infinite;
+        }
+
+        .cloud::after,
+        .cloud::before {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .cloud::after {
+            width: 100px;
+            height: 100px;
+            top: -50px;
+            left: 50px;
+        }
+
+        .cloud::before {
+            width: 120px;
+            height: 120px;
+            top: -70px;
+            left: 130px;
+        }
+
+        .cloud-1 {
+            width: 500px;
+            height: 150px;
+            top: 10%;
+            left: -600px;
+            animation-duration: 60s;
+            opacity: 0.6;
+        }
+
+        .cloud-2 {
+            width: 600px;
+            height: 180px;
+            top: 25%;
+            left: -700px;
+            animation-duration: 80s;
+            animation-delay: 10s;
+            opacity: 0.4;
+            transform: scale(1.2);
+        }
+
+        .cloud-3 {
+            width: 400px;
+            height: 120px;
+            top: 5%;
+            left: -500px;
+            animation-duration: 50s;
+            animation-delay: 25s;
+            opacity: 0.5;
+        }
+
+        .cloud-4 {
+            width: 550px;
+            height: 160px;
+            top: 15%;
+            left: -600px;
+            animation-duration: 70s;
+            animation-delay: 5s;
+            opacity: 0.3;
+            transform: scale(0.9);
+        }
+
+        @keyframes floatCloud {
+            0% {
+                left: -800px;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        /* --- DECORATION --- */
+        .decor-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .decor-item {
+            position: absolute;
+        }
+
+        .decor-lanterns {
+            top: 60px;
+            right: 50px;
+            width: 150px;
+            animation: swing 3s ease-in-out infinite alternate;
+            transform-origin: top center;
+        }
+
+        @keyframes swing {
+            0% {
+                transform: rotate(-5deg);
+            }
+
+            100% {
+                transform: rotate(5deg);
+            }
+        }
+
+
+
+        /* --- CONTAINER CHÍNH --- */
+        /* --- CONTAINER CHÍNH --- */
+        .main-container {
+            /* Glassmorphism from Duck V2 */
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+            position: relative;
+            z-index: 10;
+            width: 95%;
+            max-width: 1400px;
+            height: 90vh;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+        }
+
+        .controls-panel {
+            flex: 0 0 320px;
+            width: 320px;
+            max-width: 320px;
+            border-right: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.3);
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 20;
+        }
+
+        .controls-panel.collapsed {
+            flex: 0 0 0;
+            width: 0;
+            max-width: 0;
+            border-right: none;
+        }
+
+        .panel-inner {
+            width: 100%;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            opacity: 1;
+            transition: opacity 0.2s;
+            box-sizing: border-box;
+        }
+
+        /* Custom Scrollbar for Panel */
+        .panel-inner::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .panel-inner::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .panel-inner::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .panel-inner::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 215, 0, 0.6);
+        }
+
+        .controls-panel.collapsed .panel-inner {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* --- TOGGLE BUTTON STYLE --- */
+        .toggle-btn {
+            position: absolute;
+            top: 50%;
+            right: -26px;
+            transform: translateY(-50%);
+            width: 26px;
+            height: 52px;
+            border-radius: 0 12px 12px 0;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 2px solid #7100d1;
+            border-left: none;
+            color: #7100d1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 4px 0 12px rgba(113, 0, 209, 0.15);
+            z-index: 100;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+        }
+
+        .toggle-btn:hover {
+            border-color: #7100d1;
+            color: #7100d1;
+            box-shadow: 0 6px 20px rgba(113, 0, 209, 0.3);
+            background: linear-gradient(135deg, #fff 0%, #f3e5f5 100%);
+            transform: translateY(-2px);
+            width: 32px;
+        }
+
+        .game-stage {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 20px;
+        }
+
+
+
+        /* --- SELECT GIẢI THƯỞNG --- */
+        .prize-selector-container {
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        select#prizeSelector {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background: rgba(0, 0, 0, 0.6) url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFD700' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 10px center;
+            background-size: 16px;
+            border: 1px solid var(--glass-border);
+            color: #FFD700;
+            padding: 10px 30px 10px 10px;
+            font-size: 14px;
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: left;
+            text-transform: uppercase;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        select#prizeSelector:hover {
+            border-color: var(--tet-gold);
+            background-color: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .prize-count-badge {
+            display: block;
+            margin-top: 5px;
+            color: #eee;
+            font-size: 0.9rem;
+            text-shadow: 0 1px 2px #000;
+            font-style: italic;
+        }
+
+        .btn-reset-small {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 2px solid #7100d1;
+            color: #7100d1;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            vertical-align: middle;
+            box-shadow: 0 2px 5px rgba(113, 0, 209, 0.15);
+        }
+
+        .btn-reset-small:hover {
+            border-color: #7100d1;
+            color: #7100d1;
+            box-shadow: 0 6px 20px rgba(113, 0, 209, 0.3);
+            background: linear-gradient(135deg, #fff 0%, #f3e5f5 100%);
+            transform: rotate(180deg) translateY(-2px);
+        }
+
+        /* --- KHU VỰC SỐ (BÓNG TRÒN) --- */
+        .slots-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 15px 0;
+            padding: 25px 40px;
+            border-radius: 80px;
+            background: rgba(113, 0, 209, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        .number-ball {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4.5rem;
+            font-weight: 700;
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset -10px -10px 20px rgba(0, 0, 0, 0.5), 5px 10px 25px rgba(0, 0, 0, 0.6);
+            position: relative;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .number-ball::after {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 15%;
+            width: 35%;
+            height: 25%;
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 70%);
+            transform: rotate(-45deg);
+            pointer-events: none;
+            filter: blur(1px);
+        }
+
+        /* Màu bóng */
+        /* Màu bóng - Uniform Red */
+        .number-ball {
+            background: radial-gradient(circle at 30% 30%, #b265ff, #7100d1);
+            box-shadow: inset -10px -10px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(113, 0, 209, 0.6), 5px 10px 25px rgba(0, 0, 0, 0.6);
+        }
+
+        /* --- KHU VỰC KẾT QUẢ & QUÀ TẶNG --- */
+        .winner-section {
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            opacity: 1;
+            /* Visible to show prize name */
+            visibility: visible;
+            transform: translateY(0);
+            transition: all 0.5s ease;
+        }
+
+        /* Class to hide winner details until spin ends */
+        .winner-details-hidden {
+            display: none;
+        }
+
+        #winner-prize-category {
+            color: #ddd;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 300;
+            margin-bottom: 5px;
+        }
+
+        .winner-info-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            /* Center vertically relative to each other */
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        #winner-name {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: 700;
+            font-style: normal;
+            font-size: 4.5rem;
+            margin: 10px 0;
+            line-height: 1.1;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.9));
+            transition: color 0.3s ease;
+        }
+
+        /* Placeholder Style */
+        .winner-placeholder {
+            color: rgba(255, 255, 255, 0.3);
+            font-weight: normal;
+        }
+
+        /* Active Winner Style */
+        .winner-active {
+            background: var(--gold-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            font-weight: bold;
+        }
+
+        #winner-id {
+            font-size: 3rem;
+            color: #00ffff;
+            margin: 15px 0;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8), 0 0 20px rgba(0, 255, 255, 0.4);
+            transition: color 0.3s ease;
+        }
+
+        #winner-id.winner-placeholder {
+            color: rgba(64, 224, 208, 0.4);
+            font-weight: normal;
+        }
+
+        /* KHUNG HIỂN THỊ QUÀ TẶNG */
+        .prize-display-box {
+            position: relative;
+            background: linear-gradient(135deg, #fff 0%, #f3e5f5 100%);
+            border: 2px solid #7100d1;
+            color: #7100d1;
+            border-radius: 16px;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+            box-shadow: 0 6px 20px rgba(113, 0, 209, 0.3);
+            transform: translateY(-2px);
+            margin-top: 15px;
+            min-width: 700px;
+            min-height: 500px;
+        }
+
+        .prize-img-preview {
+            max-width: 100%;
+            height: auto;
+            max-height: 350px;
+            object-fit: contain;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(113, 0, 209, 0.5);
+            /* Purple shadow */
+            margin-bottom: 20px;
+        }
+
+        #winner-prize-item {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 2.2rem;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #7100d1, #b265ff);
+            padding: 15px 40px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(113, 0, 209, 0.4);
+            border: 2px solid #fff;
+            text-align: center;
+        }
+
+        /* --- NÚT BẤM HIỆN ĐẠI --- */
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-spin-modern {
+            position: relative;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            color: #7100d1;
+            border: 2px solid #7100d1;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(113, 0, 209, 0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-spin-modern:hover {
+            border-color: #7100d1;
+            color: #7100d1;
+            box-shadow: 0 6px 20px rgba(113, 0, 209, 0.3);
+            background: linear-gradient(135deg, #fff 0%, #f3e5f5 100%);
+            transform: translateY(-2px);
+        }
+
+        .btn-spin-modern:active {
+            transform: scale(0.95) translateY(4px);
+            box-shadow: 0 0 0 4px #b71c1c, 0 0 0 8px #FFD700, 0 2px 5px rgba(0, 0, 0, 0.6);
+        }
+
+        .btn-spin-modern.disabled {
+            filter: grayscale(100%);
+            cursor: not-allowed;
+            animation: none;
+            opacity: 0.6;
+        }
+
+        .btn-text {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.8rem;
+            font-size: 1.8rem;
+            color: #7100d1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: none;
+        }
+
+        .btn-icon {
+            font-size: 2rem;
+            margin-bottom: -5px;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+        }
+
+        @keyframes pulse-gold {
+            0% {
+                box-shadow: 0 0 0 4px #b71c1c, 0 0 0 8px #FFD700, 0 0 10px rgba(255, 215, 0, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 0 4px #b71c1c, 0 0 0 8px #FFD700, 0 0 30px rgba(255, 215, 0, 0.8);
+            }
+
+            100% {
+                box-shadow: 0 0 0 4px #b71c1c, 0 0 0 8px #FFD700, 0 0 10px rgba(255, 215, 0, 0.5);
+            }
+        }
+
+        /* --- MINIMALIST GIFT OVERLAY --- */
+        .gift-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            /* Dark semi-transparent */
+            backdrop-filter: blur(10px);
+            /* Blur effect */
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            /* Spacing between image and text */
+        }
+
+        .gift-image {
+            max-width: 600px;
+            max-height: 500px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            /* Soft Drop Shadow for 3D effect */
+            filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.5));
+            /* Entrance Animation */
+            animation: slideUpFade 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        .gift-text {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: 300;
+            /* Light weight */
+            font-size: 2rem;
+            color: #ffffff;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            /* Entrance Animation */
+            animation: fadeIn 1s ease-out 0.3s forwards;
+            opacity: 0;
+        }
+
+        .gift-icon {
+            width: 32px;
+            height: 32px;
+            fill: #fff;
+            opacity: 0.8;
+        }
+
+        @keyframes slideUpFade {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+
+
+
+
+        /* Back Button Style from Duck V2 */
+        .btn-nav-bottom {
+            margin-top: 20px;
+            padding: 15px 0;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            color: #666;
+            background: #f5f5f5;
+            text-align: center;
+            text-decoration: none;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-nav-bottom:hover {
+            background: #e0e0e0;
+            color: #333;
+            border-color: #bbb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- PANEL INNER ELEMENTS --- */
+        /* --- PANEL INNER ELEMENTS (Copied from Ticke.me Fake, adapted colors) --- */
+        .panel-inner h1 {
+            background: linear-gradient(135deg, var(--tet-gold) 0%, #FFA000 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            font-weight: 900;
+            font-size: 28px;
+            /* Matched Ticke.me Fake */
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+            width: 100%;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        .panel-inner label {
+            font-weight: 700;
+            color: #ddd;
+            /* Random Theme Color */
+            font-size: 14px;
+        }
+
+        .panel-inner textarea {
+            flex-grow: 1;
+            padding: 14px;
+            /* Matched Ticke.me Fake */
+            border: 2px solid var(--glass-border);
+            /* Matched border width */
+            border-radius: 12px;
+            /* Matched radius */
+            resize: none;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.4);
+            /* Random Theme Background */
+            color: #fff;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 150px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .panel-inner textarea:focus {
+            outline: none;
+            border-color: var(--tet-gold);
+            box-shadow: 0 4px 16px rgba(255, 215, 0, 0.2), 0 0 0 3px rgba(255, 215, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        /* Custom Scrollbar for Textarea */
+        .panel-inner textarea::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .panel-inner textarea::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0 12px 12px 0;
+        }
+
+        .panel-inner textarea::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .panel-inner textarea::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 215, 0, 0.6);
+        }
+
+        .setting-group {
+            background: rgba(0, 0, 0, 0.4);
+            /* Random Theme Background */
+            padding: 14px;
+            /* Matched Ticke.me Fake */
+            border-radius: 12px;
+            /* Matched radius */
+            border: 2px solid var(--glass-border);
+            /* Matched border width */
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .setting-group:hover {
+            border-color: rgba(255, 215, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        /* #btnMute Hover Style */
+        #btnMute:hover {
+            border-color: #7100d1 !important;
+            color: #7100d1 !important;
+            box-shadow: 0 6px 20px rgba(113, 0, 209, 0.3) !important;
+            background: linear-gradient(135deg, #fff 0%, #f3e5f5 100%) !important;
+            transform: translateY(-2px);
+        }
+
+        /* --- BUTTON STYLES (Adapted from Ticke.me Fake) --- */
+
+
+        .btn-spin,
+        .btn-small {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            color: #333;
+            border: 2px solid rgba(113, 0, 209, 0.2);
+            box-shadow: 0 4px 12px rgba(113, 0, 209, 0.15);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-spin::before,
+        .btn-small::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(113, 0, 209, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-spin:hover::before,
+        .btn-small:hover::before {
+            left: 100%;
+        }
+
+        .btn-spin:hover,
+        .btn-small:hover {
+            border-color: #7100d1;
+            color: #7100d1;
+            box-shadow: 0 6px 20px rgba(113, 0, 209, 0.3);
+            background: linear-gradient(135deg, #fff 0%, #f3e5f5 100%);
+            transform: translateY(-2px);
+        }
+
+        .btn-spin {
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 18px;
+            text-transform: uppercase;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+
+        .btn-spin:active {
+            transform: translateY(0px) scale(0.98);
+        }
+
+        .btn-spin:disabled {
+            background: linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%);
+            color: #999;
+            cursor: not-allowed;
+            border-color: #ddd;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .btn-group-small {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 11px;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+
+        .btn-import {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-import input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+
+    <div class="clouds-container">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+        <div class="cloud cloud-4"></div>
+    </div>
+
+    <div class="decor-container">
+        <img src="../Ticke.me Fake/y1-logo.png" class="decor-item decor-lanterns" alt="Lồng Đèn"
+            onerror="this.style.display='none'">
+    </div>
+
+
+
+    <!-- Audio Element -->
+    <audio id="spinMusic" src="../audio/Nhạc Quay Số Vòng Tròn.MP3" loop></audio>
+
+
+
+    <div class="main-container">
+
+        <!-- LEFT PANEL: CONTROLS -->
+        <!-- LEFT PANEL: CONTROLS -->
+        <div class="controls-panel" id="controlsPanel">
+            <button class="toggle-btn" id="toggleBtn" title="Đóng/Mở cài đặt">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <div class="panel-inner">
+                <h1>QUAY SỐ MAY MẮN</h1>
+
+
+
+                <!-- namesInput removed -->
+
+                <div class="setting-group">
+                    <!-- Audio Control -->
+                    <div
+                        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                        <label>Âm thanh:</label>
+                        <button id="btnMute"
+                            style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 2px solid #7100d1; color: #7100d1; padding: 5px 15px; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 12px rgba(113, 0, 209, 0.15);">
+                            <i class="fas fa-volume-up"></i> Bật/Tắt
+                        </button>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <label>Chọn giải thưởng:</label>
+                        <select id="prizeSelector" onchange="renderUI()"
+                            style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--glass-border); margin-top: 5px; background: rgba(0,0,0,0.5); color: #fff;">
+                            <option value="">-- CHỌN GIẢI THƯỞNG --</option>
+                        </select>
+                        <div
+                            style="margin-top: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #aaa;">
+                            <span id="prizeCountBadge">Hệ thống sẵn sàng</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="spinBtn" class="btn-spin disabled" onclick="startSpin()">QUAY NGAY</button>
+
+                <div class="btn-group-small">
+                    <button onclick="location.reload()" class="btn-small btn-reset" style="width: 100%;">Làm
+                        mới</button>
+                </div>
+
+                <a href="../index.html" class="btn-nav-bottom">
+                    <i class="fas fa-arrow-left"></i> Quay lại Menu
+                </a>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: GAME STAGE -->
+        <div class="game-stage">
+            <!-- 4 BÓNG SỐ -->
+            <div class="slots-container" id="slotsContainer">
+                <div class="number-ball" id="ball-1">0</div>
+                <div class="number-ball" id="ball-2">0</div>
+                <div class="number-ball" id="ball-3">0</div>
+                <div class="number-ball" id="ball-4">0</div>
+            </div>
+
+            <!-- KHU VỰC HIỂN THỊ NGƯỜI THẮNG -->
+            <div class="winner-section" id="winnerSection">
+                <div id="winner-prize-category">GIẢI THƯỞNG</div>
+                <div class="winner-info-row">
+                    <h2 id="winner-name" class="winner-placeholder" style="margin: 0;">Người trúng giải: ???</h2>
+                    <div id="winner-id" class="winner-placeholder" style="margin: 0;">???</div>
+                </div>
+
+                <div class="prize-display-box">
+                    <img src="" id="prizePreviewImg" class="prize-img-preview" style="display:none">
+                    <div id="winner-prize-item">---</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        // --- CONFIGURATION ---
+        const CONFIG = {
+            BALL_COUNT: 4,
+            STORAGE_KEYS: {
+                PRIZES: 'lucky_draw_prizes',
+                PARTICIPANTS: 'lucky_draw_participants',
+                WINNERS: 'lucky_draw_winners'
+            },
+            DEFAULT_PRIZES: [
+                { "name": "Giải Đặc Biệt", "quantity": 1, "item": "Xe Máy SH 150i", "image": "" },
+                { "name": "Giải Nhất", "quantity": 1, "item": "iPhone 15 Pro Max", "image": "" },
+                { "name": "Giải Nhì", "quantity": 2, "item": "Smart Tivi Sony 55 inch", "image": "" },
+                { "name": "Giải Khuyến Khích", "quantity": 5, "item": "Nồi Chiên Không Dầu", "image": "" }
+            ],
+            DEFAULT_GIFT_IMG: "https://cdn-icons-png.flaticon.com/512/4213/4213958.png"
+        };
+
+        // --- STATE ---
+        let state = {
+            prizes: [],
+            participants: [],
+            isSpinning: false,
+            currentPrizeIndex: -1,
+            currentWinner: null
+        };
+
+        // --- DOM ELEMENTS ---
+        const elements = {
+            prizeSelector: document.getElementById('prizeSelector'),
+            prizeCountBadge: document.getElementById('prizeCountBadge'),
+            balls: [
+                document.getElementById('ball-1'),
+                document.getElementById('ball-2'),
+                document.getElementById('ball-3')
+            ],
+            winnerSection: document.getElementById('winnerSection'),
+            winnerName: document.getElementById('winner-name'),
+            winnerId: document.getElementById('winner-id'),
+            winnerCategory: document.getElementById('winner-prize-category'),
+            winnerItem: document.getElementById('winner-prize-item'),
+            prizePreviewImg: document.getElementById('prizePreviewImg'),
+            spinBtn: document.getElementById('spinBtn'),
+
+            // Overlay Elements
+            giftOverlay: document.getElementById('giftOverlay'),
+            giftImage: document.getElementById('giftImageElem'),
+
+            prizeDisplayBox: document.querySelector('.prize-display-box'),
+
+            // namesInput and countDisplay removed
+
+            // Audio Controls
+            spinMusic: document.getElementById('spinMusic'),
+            btnMute: document.getElementById('btnMute')
+        };
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initData();
+        });
+
+        function initData() {
+            // 1. Load Prizes
+            const storedPrizes = localStorage.getItem(CONFIG.STORAGE_KEYS.PRIZES);
+            if (storedPrizes) {
+                try {
+                    state.prizes = JSON.parse(storedPrizes);
+                    // Validate structure
+                    if (!Array.isArray(state.prizes) || state.prizes.length === 0) {
+                        throw new Error("Invalid prizes data");
+                    }
+                } catch (e) {
+                    console.error("Error parsing prizes", e);
+                    state.prizes = JSON.parse(JSON.stringify(CONFIG.DEFAULT_PRIZES));
+                    localStorage.setItem(CONFIG.STORAGE_KEYS.PRIZES, JSON.stringify(state.prizes));
+                }
+            } else {
+                state.prizes = JSON.parse(JSON.stringify(CONFIG.DEFAULT_PRIZES));
+                localStorage.setItem(CONFIG.STORAGE_KEYS.PRIZES, JSON.stringify(state.prizes));
+            }
+
+            // 2. Load Participants
+            const storedParticipants = localStorage.getItem(CONFIG.STORAGE_KEYS.PARTICIPANTS);
+            if (storedParticipants) {
+                try {
+                    state.participants = JSON.parse(storedParticipants);
+
+                    // --- FILTER OUT WINNERS ---
+                    const storedWinners = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.WINNERS) || '[]');
+                    const winnerIds = new Set(storedWinners.map(w => w.id ? String(w.id).trim() : null).filter(x => x));
+
+                    state.participants = state.participants.filter(p => {
+                        let pId = p.id || p.msnv || p.code || p.employeeCode || p.ma_nv || p.stt || null;
+                        pId = pId ? String(pId).trim() : null;
+
+                        if (pId && winnerIds.has(pId)) return false;
+                        return true;
+                    });
+                    // --------------------------
+
+                } catch (e) {
+                    console.error("Error parsing participants", e);
+                    state.participants = [];
+                }
+            }
+
+            // Sync Textarea
+            updateTextareaFromState();
+
+            // 3. Initial Render
+            renderDropdown();
+            renderBalls(); // Dynamic ball rendering
+
+            // Auto select first available
+            const firstAvailable = state.prizes.findIndex(p => p.quantity > 0);
+            if (firstAvailable !== -1) {
+                elements.prizeSelector.value = firstAvailable;
+                state.currentPrizeIndex = firstAvailable;
+            }
+
+            renderUI();
+            resetWinnerUI();
+        }
+
+        // --- DYNAMIC BALL RENDERING ---
+        function renderBalls() {
+            const container = document.querySelector('.slots-container');
+            container.innerHTML = ''; // Clear existing
+
+            // Calculate digits needed. Default to 3 if no participants yet.
+            // FIXED: User requested 4 slots
+            const digits = 4;
+            CONFIG.BALL_COUNT = digits;
+
+            for (let i = 0; i < digits; i++) {
+                const ball = document.createElement('div');
+                ball.className = 'number-ball';
+                ball.id = `ball-${i + 1}`;
+                ball.textContent = '0';
+                container.appendChild(ball);
+            }
+
+            // Re-query elements
+            elements.balls = Array.from(document.querySelectorAll('.number-ball'));
+        }
+
+        // --- UI RENDERING ---
+        function renderDropdown() {
+            elements.prizeSelector.innerHTML = '<option value="">-- CHỌN GIẢI THƯỞNG --</option>';
+
+            state.prizes.forEach((prize, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                const status = prize.quantity <= 0 ? " (HẾT)" : "";
+                option.text = `${prize.name}${status}`;
+                option.disabled = prize.quantity <= 0;
+                elements.prizeSelector.appendChild(option);
+            });
+
+            // Restore selection if valid
+            if (state.currentPrizeIndex !== -1) {
+                elements.prizeSelector.value = state.currentPrizeIndex;
+            }
+        }
+
+        function renderUI() {
+            const idx = elements.prizeSelector.value;
+            state.currentPrizeIndex = idx === "" ? -1 : parseInt(idx);
+
+            const prize = state.prizes[state.currentPrizeIndex];
+
+            if (!prize) {
+                elements.prizeCountBadge.textContent = "Vui lòng chọn giải thưởng";
+                elements.spinBtn.classList.add('disabled');
+                resetWinnerUI();
+                return;
+            }
+
+            // Ensure box is hidden when switching prizes (until won)
+            if (elements.prizeDisplayBox) {
+                elements.prizeDisplayBox.style.display = 'none';
+            }
+
+            // Update Badge
+            if (prize.quantity > 0) {
+                elements.prizeCountBadge.textContent = `Còn lại: ${prize.quantity} suất`;
+                elements.prizeCountBadge.style.color = "#eee";
+                elements.spinBtn.classList.remove('disabled');
+            } else {
+                elements.prizeCountBadge.textContent = "ĐÃ HẾT QUÀ";
+                elements.prizeCountBadge.style.color = "#ff5252";
+                elements.spinBtn.classList.add('disabled');
+            }
+
+            // Update Preview
+            // Update Preview
+            // "prize-display-box" Logic:
+            // USER REQUEST: Show Prize Name. Do NOT show Prize Item separately.
+            // But usually "Prize Name" = "Giải Nhất", "Prize Item" = "Iphone".
+            // User said: "Hiển thị tên giải thưởng. Không hiển thị tên phần thưởng"
+            // Let's intepret: Show "Giải Nhất - Iphone" in the category box? Or just "Giải Nhất"?
+            // If "Tên giải thưởng" means "Category" (e.g. Giải Đặc Biệt)
+            // If "Tên phần thưởng" means "Item" (e.g. Xe máy)
+            // The request seems to be: Show Category, Hide Item string in the main box?
+            // Wait, looking at current UI: 
+            // #winner-prize-category shows prize.name
+            // #winner-prize-item shows prize.item
+            // Request: "prize-display-box. Chỉnh sửa hiển thị tên giải thưởng. Không hiển thị tên phần thưởng"
+            // The .prize-display-box contains the Item (#winner-prize-item).
+            // So I should show `prize.name` inside `prize-display-box`? And hide `prize.item`?
+            // Currently `winner-prize-category` is OUTSIDE the box.
+
+            // Let's put `prize.name` into `winnerItem` (inside the box) and hide the outside one?
+            // Or just swap them?
+
+            // Let's try:
+            // 1. Hide the outside category label (or keep it?)
+            // 2. Inside the box, show only `prize.name` (Tên Giải).
+
+            elements.winnerCategory.textContent = ""; // Hide outside label? Or keep?
+            // Actually, let's just make the BOX show the Prize Name (Category)
+
+            elements.winnerItem.textContent = prize.name; // Show "Giải Nhất" inside the box
+            // prize.item is ignored / not shown.
+
+            if (prize.image) {
+                elements.prizePreviewImg.src = prize.image;
+                elements.prizePreviewImg.style.display = 'block';
+            } else {
+                elements.prizePreviewImg.style.display = 'none';
+            }
+        }
+
+        function resetWinnerUI() {
+            // Hide Winner Details (Name/ID) but keep Section visible for Prize Name
+            elements.winnerName.classList.add('winner-details-hidden');
+            elements.winnerId.classList.add('winner-details-hidden');
+
+            if (elements.prizeDisplayBox) {
+                elements.prizeDisplayBox.style.display = 'none';
+            }
+
+            // Ensure section is visible
+            elements.winnerSection.style.opacity = '1';
+            elements.winnerSection.style.visibility = 'visible';
+
+            // Reset Balls
+            elements.balls.forEach(ball => {
+                ball.textContent = "0";
+                ball.style.transform = "scale(1)";
+                ball.style.color = "#fff";
+                delete ball.dataset.locked;
+            });
+        }
+
+        // --- SPIN LOGIC ---
+        function startSpin() {
+            if (state.isSpinning) return;
+
+            // Validate
+            if (state.currentPrizeIndex === -1) {
+                alert("Vui lòng chọn giải thưởng!");
+                return;
+            }
+            if (state.prizes[state.currentPrizeIndex].quantity <= 0) {
+                alert("Giải thưởng này đã hết!");
+                return;
+            }
+            if (state.participants.length === 0) {
+                alert("Chưa có danh sách người tham gia!");
+                return;
+            }
+
+            // Play Music
+            if (elements.spinMusic) {
+                elements.spinMusic.currentTime = 0;
+                elements.spinMusic.play().catch(e => console.log("Audio play failed:", e));
+            }
+
+            // Lock UI
+            state.isSpinning = true;
+            elements.spinBtn.classList.add('disabled');
+            elements.prizeSelector.disabled = true;
+
+            // Hide previous winner details
+            elements.winnerName.classList.add('winner-details-hidden');
+            elements.winnerId.classList.add('winner-details-hidden');
+            if (elements.prizeDisplayBox) {
+                elements.prizeDisplayBox.style.display = 'none';
+            }
+
+            elements.winnerId.textContent = "";
+
+            // Pick Winner
+            const winnerIndex = Math.floor(Math.random() * state.participants.length);
+            state.currentWinner = state.participants[winnerIndex];
+
+            // Use Index + 1 as STT if stt property is missing or invalid
+            // Or try to parse stt if it exists
+            // Process ID for display on balls (Digits only)
+            // Prioritize: ID -> MSNV -> Code -> STT -> NAME (if numeric) -> Index
+            let w = state.currentWinner;
+
+            // 1. Try to extract digits from Name first (Priority per user request)
+            // e.g. "YEG227" -> "227"
+            let digitsOnly = "";
+            let sourceIsName = false;
+
+            if (w.name) {
+                const nameDigits = w.name.toString().replace(/\D/g, '');
+                if (nameDigits.length > 0) {
+                    digitsOnly = nameDigits;
+                    sourceIsName = true;
+                }
+            }
+
+            // 2. If no digits in name, try explicit ID fields
+            if (!digitsOnly) {
+                let rawId = w.id || w.msnv || w.code || w.employeeCode || w.stt;
+                if (rawId) {
+                    digitsOnly = rawId.toString().replace(/\D/g, '');
+                }
+            }
+
+            // 3. Final fallback to index
+            if (!digitsOnly) {
+                digitsOnly = (winnerIndex + 1).toString();
+            }
+
+            // Ensure ID is synchronous with the Result
+            // Ensure ID is synchronous with the Result
+            if (sourceIsName) {
+                // If the digits came from the name, we should prefer the explicit ID for display if we have it
+                state.currentWinner.id = w.id || w.msnv || w.code || w.name;
+            } else if (!state.currentWinner.id) {
+                // Fallback to digits or name if no ID
+                state.currentWinner.id = w.id || w.msnv || w.code || digitsOnly;
+            }
+
+
+
+            // Pad or trim to fit BALL_COUNT (4) - Take LAST 4 digits
+            let sttStr = digitsOnly;
+            if (sttStr.length > CONFIG.BALL_COUNT) {
+                sttStr = sttStr.slice(-CONFIG.BALL_COUNT);
+            } else {
+                sttStr = sttStr.padStart(CONFIG.BALL_COUNT, '0');
+            }
+
+            const targetDigits = sttStr.split('');
+
+            // Animation
+            const intervals = [];
+            elements.balls.forEach((ball, idx) => {
+                ball.style.transform = "scale(1)";
+                ball.style.color = "#fff";
+                const interval = setInterval(() => {
+                    ball.textContent = Math.floor(Math.random() * 10);
+                }, 50);
+                intervals.push(interval);
+            });
+
+            // Stop balls
+            // User requested 35 seconds total spin time -> Changed to 25s
+            const TOTAL_SPIN_TIME = 25000;
+            const STOP_INTERVAL = 2000; // Time between each ball stopping (2s)
+
+            // Calculate starting delay for the first ball so the last ball stops at TOTAL_SPIN_TIME
+            let delay = TOTAL_SPIN_TIME - ((targetDigits.length - 1) * STOP_INTERVAL);
+
+            // Ensure delay is not negative (sanity check)
+            if (delay < 1000) delay = 1000;
+
+            targetDigits.forEach((digit, index) => {
+                setTimeout(() => {
+                    if (intervals[index]) clearInterval(intervals[index]);
+                    const ball = elements.balls[index];
+                    if (ball) {
+                        ball.textContent = digit;
+                        ball.style.transform = "scale(1.3)";
+                        ball.style.color = "#FFD700";
+                        setTimeout(() => { ball.style.transform = "scale(1)"; }, 200);
+                    }
+
+                    if (index === targetDigits.length - 1) { // Last ball
+                        setTimeout(endSpin, 800);
+                    }
+                }, delay);
+                delay += STOP_INTERVAL;
+            });
+        }
+
+        function endSpin() {
+            // Stop Music
+            if (elements.spinMusic) {
+                elements.spinMusic.pause();
+                elements.spinMusic.currentTime = 0;
+            }
+
+            const prize = state.prizes[state.currentPrizeIndex];
+
+            // 1. Deduct Quantity
+            // prize.quantity--;
+            // localStorage.setItem(CONFIG.STORAGE_KEYS.PRIZES, JSON.stringify(state.prizes));
+
+            // 2. Save Winner
+            const winners = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.WINNERS) || '[]');
+            winners.push({
+                name: state.currentWinner.name,
+                id: state.currentWinner.id,
+                prize: prize.name,
+                prizeItem: prize.item,
+                timestamp: Date.now(),
+                gameType: "Quay Số"
+            });
+            localStorage.setItem(CONFIG.STORAGE_KEYS.WINNERS, JSON.stringify(winners));
+
+            // --- REMOVE WINNER FROM PARTICIPANTS LIST ---
+            try {
+                let currentParticipants = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.PARTICIPANTS) || '[]');
+                // IMPORTANT: state.currentWinner might have been mutated in startSpin.
+                // We trust 'id' if it exists, or 'name'.
+
+                let wID = String(state.currentWinner.id || state.currentWinner.msnv || state.currentWinner.code || "").trim();
+                let wName = String(state.currentWinner.name || "").trim();
+
+                currentParticipants = currentParticipants.filter(p => {
+                    let pId = String(p.id || p.msnv || p.code || p.employeeCode || "").trim();
+                    let pName = String(p.name || "").trim();
+
+                    // 1. Match by ID if possible
+                    if (wID && pId && wID === pId) return false;
+
+                    // 2. Fallback to Name
+                    if ((!wID || !pId) && wName && pName === wName) return false;
+
+                    return true;
+                });
+
+                localStorage.setItem(CONFIG.STORAGE_KEYS.PARTICIPANTS, JSON.stringify(currentParticipants));
+
+                // Update local state too
+                state.participants = currentParticipants;
+                console.log("Removed winner from list:", wID);
+            } catch (e) { console.error(e); }
+
+            // 3. Update UI - SHOW ACTUAL WINNER
+            // User Request: "text màu vàng cần hiển thị id trong localstorage"
+            // elements.winnerName has class "winner-active" which is the Gold/Yellow text.
+            elements.winnerName.textContent = state.currentWinner.id;
+
+            // The other field (Cyan) shows the Name
+            elements.winnerId.textContent = state.currentWinner.name;
+
+            // Switch styles from Placeholder to Active
+            elements.winnerName.className = "winner-active";
+            elements.winnerId.className = ""; // Remove placeholder class, use default ID style
+
+            // Show Winner Details
+            elements.winnerName.classList.remove('winner-details-hidden');
+            elements.winnerId.classList.remove('winner-details-hidden');
+            renderDropdown(); // Update dropdown text (quantity)
+            renderUI();       // Update badge
+
+            if (elements.prizeDisplayBox) {
+                elements.prizeDisplayBox.style.display = 'flex';
+            }
+
+            launchConfetti();
+
+            // 4. Finalize & Reset State (Previously in closeGiftOverlay)
+            state.isSpinning = false;
+            elements.prizeSelector.disabled = false;
+
+            // Check if out of stock
+            if (state.prizes[state.currentPrizeIndex].quantity <= 0) {
+                // Try to find next available
+                const nextIdx = state.prizes.findIndex(p => p.quantity > 0);
+                if (nextIdx !== -1) {
+                    setTimeout(() => {
+                        alert("Giải này đã hết! Chuyển sang giải tiếp theo.");
+                        elements.prizeSelector.value = nextIdx;
+                        renderUI();
+                    }, 500);
+                }
+            } else {
+                elements.spinBtn.classList.remove('disabled');
+            }
+        }
+
+        // --- TEXTAREA LOGIC ---
+        // --- TEXTAREA LOGIC REMOVED ---
+
+        function updateTextareaFromState() {
+            // Feature removed
+        }
+
+        // --- EXCEL UPLOAD PLACEHOLDER ---
+        function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Placeholder for Excel logic (requires SheetJS or similar)
+            alert("Tính năng nhập Excel đang được phát triển. Vui lòng nhập tay vào ô văn bản.");
+            // Reset input
+            event.target.value = '';
+        }
+
+        // --- TOGGLE PANEL LOGIC ---
+        const controlsPanel = document.getElementById('controlsPanel');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const toggleIcon = toggleBtn.querySelector('i');
+
+        toggleBtn.addEventListener('click', () => {
+            controlsPanel.classList.toggle('collapsed');
+
+            if (controlsPanel.classList.contains('collapsed')) {
+                toggleIcon.classList.remove('fa-chevron-left');
+                toggleIcon.classList.add('fa-chevron-right');
+            } else {
+                toggleIcon.classList.remove('fa-chevron-right');
+                toggleIcon.classList.add('fa-chevron-left');
+            }
+        });
+
+        function launchConfetti() {
+            const duration = 3000;
+            const end = Date.now() + duration;
+            const colors = ['#ff0000', '#ffd700', '#ffffff'];
+
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: colors });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: colors });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+
+        // --- MUTE BUTTON LOGIC ---
+        let isMuted = false;
+        if (elements.btnMute && elements.spinMusic) {
+            elements.btnMute.addEventListener('click', () => {
+                isMuted = !isMuted;
+                elements.spinMusic.muted = isMuted;
+
+                // Update Icon
+                const icon = elements.btnMute.querySelector('i');
+                if (isMuted) {
+                    icon.classList.remove('fa-volume-up');
+                    icon.classList.add('fa-volume-mute');
+                    elements.btnMute.style.color = "#999"; // Grey when muted
+                    elements.btnMute.style.borderColor = "#999";
+                } else {
+                    icon.classList.remove('fa-volume-mute');
+                    icon.classList.add('fa-volume-up');
+                    elements.btnMute.style.color = "#7100d1"; // Purple brand
+                    elements.btnMute.style.borderColor = "#7100d1";
+                }
+            });
+        }
+
+        function resetPrizes() {
+            if (confirm("Bạn có chắc chắn muốn khôi phục lại toàn bộ số lượng quà tặng về mặc định không?")) {
+                state.prizes = JSON.parse(JSON.stringify(CONFIG.DEFAULT_PRIZES));
+                localStorage.setItem(CONFIG.STORAGE_KEYS.PRIZES, JSON.stringify(state.prizes));
+
+                // Re-render
+                renderDropdown();
+
+                // Auto select first available
+                const firstAvailable = state.prizes.findIndex(p => p.quantity > 0);
+                if (firstAvailable !== -1) {
+                    elements.prizeSelector.value = firstAvailable;
+                    state.currentPrizeIndex = firstAvailable;
+                }
+
+                renderUI();
+                alert("Đã khôi phục danh sách quà tặng thành công!");
+            }
+        }
+    </script>
+</body>
+
+</html>

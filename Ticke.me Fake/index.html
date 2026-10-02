@@ -1,0 +1,1986 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Draw - Tết Vạn Lộc</title>
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="icon" href="../images.png" type="image/x-icon">
+    <style>
+        /* --- 1. GLOBAL VISUAL STYLE & LAYOUT (From Duck V2) --- */
+        :root {
+            --tet-red: #D32F2F;
+            --tet-gold: #FFD700;
+            --tet-yellow: #FFEB3B;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-light: #ffffff;
+            --text-dim: #dddddd;
+
+            /* Existing Vars */
+            --primary-color: #d63031;
+            --accent-color: #f1c40f;
+            --purple-brand: #7100d1;
+            --slot-bg: #ecf0f1;
+            --text-color: #2c3e50;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+        }
+
+        /* Background: Full-screen festive Tet background */
+        .bg-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("../FINAL.jpg");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        /* Lớp phủ màu tím lên trên ảnh nền */
+        .bg-image::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 107, 107, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(241, 196, 15, 0.2) 0%, transparent 50%),
+                linear-gradient(135deg, rgba(113, 0, 209, 0.15) 0%, rgba(188, 86, 252, 0.25) 100%);
+            z-index: 0;
+            pointer-events: none;
+            animation: gradientShift 10s ease infinite;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        /* --- CLOUDS ANIMATION --- */
+        .clouds-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 100px;
+            filter: blur(20px);
+            animation: floatCloud linear infinite;
+        }
+
+        .cloud::after,
+        .cloud::before {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .cloud::after {
+            width: 100px;
+            height: 100px;
+            top: -50px;
+            left: 50px;
+        }
+
+        .cloud::before {
+            width: 120px;
+            height: 120px;
+            top: -70px;
+            left: 130px;
+        }
+
+        .cloud-1 {
+            width: 500px;
+            height: 150px;
+            top: 10%;
+            left: -600px;
+            animation-duration: 60s;
+            opacity: 0.6;
+        }
+
+        .cloud-2 {
+            width: 600px;
+            height: 180px;
+            top: 25%;
+            left: -700px;
+            animation-duration: 80s;
+            animation-delay: 10s;
+            opacity: 0.4;
+            transform: scale(1.2);
+        }
+
+        .cloud-3 {
+            width: 400px;
+            height: 120px;
+            top: 5%;
+            left: -500px;
+            animation-duration: 50s;
+            animation-delay: 25s;
+            opacity: 0.5;
+        }
+
+        .cloud-4 {
+            width: 550px;
+            height: 160px;
+            top: 15%;
+            left: -600px;
+            animation-duration: 70s;
+            animation-delay: 5s;
+            opacity: 0.3;
+            transform: scale(0.9);
+        }
+
+        @keyframes floatCloud {
+            0% {
+                left: -800px;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        /* --- NÚT BACK MENU --- */
+        /* Back Button Style from Duck V2 */
+        .btn-nav-bottom {
+            margin-top: 20px;
+            padding: 15px 0;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            color: #666;
+            background: #f5f5f5;
+            text-align: center;
+            text-decoration: none;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-nav-bottom:hover {
+            background: #e0e0e0;
+            color: #333;
+            border-color: #bbb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- DECORATION --- */
+        .decor-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .decor-item {
+            position: absolute;
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25));
+        }
+
+        .decor-lanterns {
+            top: 30px;
+            right: 30px;
+            width: 120px;
+            animation: swing 3s infinite ease-in-out, glow 2s infinite ease-in-out;
+            transform-origin: top center;
+        }
+
+        .decor-canh-mai {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 250px;
+            max-width: 40%;
+            pointer-events: none;
+            filter: drop-shadow(2px 4px 8px rgba(0, 0, 0, 0.3));
+            z-index: 5;
+            transform: translate(-20%, -20%);
+            animation: floatSlow 6s infinite ease-in-out;
+        }
+
+        .decor-long-den {
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            width: 120px;
+            max-width: 30%;
+            pointer-events: none;
+            filter: drop-shadow(2px 4px 8px rgba(0, 0, 0, 0.3));
+            z-index: 5;
+            transform-origin: top center;
+            animation: swing 4s infinite ease-in-out;
+        }
+
+        @keyframes swing {
+            0% {
+                transform: rotate(3deg);
+            }
+
+            50% {
+                transform: rotate(-3deg);
+            }
+
+            100% {
+                transform: rotate(3deg);
+            }
+        }
+
+        @keyframes glow {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 8px 16px rgba(241, 196, 15, 0.4));
+            }
+
+            50% {
+                filter: drop-shadow(0 8px 24px rgba(241, 196, 15, 0.7));
+            }
+        }
+
+        @keyframes floatSlow {
+
+            0%,
+            100% {
+                transform: translate(-20%, -20%);
+            }
+
+            50% {
+                transform: translate(-20%, -15%);
+            }
+        }
+
+        /* --- MAIN CONTAINER --- */
+        /* --- MAIN CONTAINER --- */
+        .container {
+            /* Glassmorphism from Duck V2 */
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: row;
+            width: 95%;
+            max-width: 1400px;
+            height: 90vh;
+            /* Fixed height like Duck V2 */
+            overflow: hidden;
+        }
+
+        /* --- CONTROLS PANEL --- */
+        .controls-panel {
+            flex: 0 0 320px;
+            width: 320px;
+            max-width: 320px;
+            border-right: 2px solid rgba(113, 0, 209, 0.1);
+            background: linear-gradient(180deg, rgba(250, 250, 252, 0.8) 0%, rgba(245, 245, 250, 0.9) 100%);
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 20;
+        }
+
+        .controls-panel.collapsed {
+            flex: 0 0 0;
+            width: 0;
+            max-width: 0;
+            border-right: none;
+        }
+
+        .panel-inner {
+            width: 320px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+            overflow-y: auto;
+            opacity: 1;
+            transition: opacity 0.2s;
+        }
+
+        .controls-panel.collapsed .panel-inner {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* --- TOGGLE BUTTON STYLE --- */
+        .toggle-btn {
+            position: absolute;
+            top: 50%;
+            right: -26px;
+            transform: translateY(-50%);
+            width: 26px;
+            height: 52px;
+            border-radius: 0 12px 12px 0;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border: 2px solid rgba(113, 0, 209, 0.2);
+            border-left: none;
+            color: var(--purple-brand);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 4px 0 12px rgba(113, 0, 209, 0.15);
+            z-index: 100;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+        }
+
+        .toggle-btn:hover {
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+            width: 32px;
+            box-shadow: 6px 0 16px rgba(113, 0, 209, 0.25);
+        }
+
+        .toggle-btn i {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 16px;
+        }
+
+        .controls-panel.collapsed .toggle-btn i {
+            transform: rotate(180deg);
+        }
+
+        h1 {
+            background: linear-gradient(135deg, var(--purple-brand) 0%, #9c27b0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            font-weight: 900;
+            font-size: 28px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(113, 0, 209, 0.1);
+            filter: drop-shadow(0 2px 4px rgba(113, 0, 209, 0.1));
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+        }
+
+        label {
+            font-weight: 700;
+            color: #555;
+            font-size: 14px;
+        }
+
+        textarea {
+            flex-grow: 1;
+            padding: 14px;
+            border: 2px solid rgba(113, 0, 209, 0.2);
+            border-radius: 12px;
+            resize: none;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.95);
+            min-height: 150px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--purple-brand);
+            box-shadow: 0 4px 16px rgba(113, 0, 209, 0.2), 0 0 0 3px rgba(113, 0, 209, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .setting-group {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 14px;
+            border-radius: 12px;
+            border: 2px solid rgba(113, 0, 209, 0.1);
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .setting-group:hover {
+            border-color: rgba(113, 0, 209, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-spin,
+        .btn-small {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            color: #333;
+            border: 2px solid rgba(113, 0, 209, 0.2);
+            box-shadow: 0 4px 12px rgba(113, 0, 209, 0.15);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-spin::before,
+        .btn-small::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(113, 0, 209, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-spin:hover::before,
+        .btn-small:hover::before {
+            left: 100%;
+        }
+
+        .btn-spin:hover,
+        .btn-small:hover {
+            border-color: #7100d1;
+            color: #7100d1;
+            box-shadow: 0 6px 20px rgba(113, 0, 209, 0.3);
+            background: linear-gradient(135deg, #fff 0%, #f3e5f5 100%);
+            transform: translateY(-2px);
+        }
+
+        .btn-spin {
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 18px;
+            text-transform: uppercase;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+
+        .btn-spin:active {
+            transform: translateY(0px) scale(0.98);
+        }
+
+        .btn-spin:disabled {
+            background: linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%);
+            color: #999;
+            cursor: not-allowed;
+            border-color: #ddd;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .btn-group-small {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 11px;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        .btn-import {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-import input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* --- SLOT MACHINE PANEL --- */
+        .slot-panel {
+            position: relative;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: all 0.4s;
+            overflow: hidden;
+        }
+
+        /* Trang trí Tết cho slot panel */
+        .tet-decor {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.15;
+            z-index: 1;
+        }
+
+        .tet-text-top {
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 42px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #d63031 0%, #ff6b6b 50%, #d63031 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            filter: drop-shadow(0 2px 4px rgba(214, 48, 49, 0.3));
+        }
+
+        .tet-text-bottom {
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: 700;
+            color: #f1c40f;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            filter: drop-shadow(0 2px 4px rgba(241, 196, 15, 0.4));
+        }
+
+        .coin-decor {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffd700, #f1c40f, #d4af37);
+            border: 3px solid #d4af37;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 28px;
+            color: #d63031;
+            opacity: 0.2;
+            animation: coinFloat 4s ease-in-out infinite;
+        }
+
+        .coin-left {
+            top: 40%;
+            left: 5%;
+        }
+
+        .coin-right {
+            top: 35%;
+            right: 5%;
+            animation-delay: 1s;
+        }
+
+        @keyframes coinFloat {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-15px) rotate(180deg);
+            }
+        }
+
+        .firework-decor {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            opacity: 0.12;
+            animation: fireworkPulse 3s ease-in-out infinite;
+        }
+
+        .firework-left {
+            top: 15%;
+            left: 8%;
+        }
+
+        .firework-right {
+            bottom: 15%;
+            right: 8%;
+            animation-delay: 1.5s;
+        }
+
+        @keyframes fireworkPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.12;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.18;
+            }
+        }
+
+        .firework-decor::before,
+        .firework-decor::after {
+            content: '✨';
+            position: absolute;
+            font-size: 36px;
+            color: #f1c40f;
+        }
+
+        .firework-decor::before {
+            top: 0;
+            left: 0;
+        }
+
+        .firework-decor::after {
+            bottom: 0;
+            right: 0;
+            color: #e74c3c;
+        }
+
+        .bamboo-left,
+        .bamboo-right {
+            position: absolute;
+            width: 8px;
+            height: 180px;
+            background: linear-gradient(to bottom,
+                    #27ae60 0%, #229954 25%, #27ae60 50%, #229954 75%, #27ae60 100%);
+            border-radius: 4px;
+            opacity: 0.1;
+            box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .bamboo-left {
+            top: 50%;
+            left: 2%;
+            transform: translateY(-50%) rotate(-3deg);
+        }
+
+        .bamboo-right {
+            top: 50%;
+            right: 2%;
+            transform: translateY(-50%) rotate(3deg);
+        }
+
+        .bamboo-left::before,
+        .bamboo-left::after,
+        .bamboo-right::before,
+        .bamboo-right::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.2);
+            left: 0;
+        }
+
+        .bamboo-left::before,
+        .bamboo-right::before {
+            top: 33%;
+        }
+
+        .bamboo-left::after,
+        .bamboo-right::after {
+            top: 66%;
+        }
+
+        .lucky-cloud {
+            position: absolute;
+            opacity: 0.08;
+            font-size: 48px;
+            animation: cloudFloat 8s ease-in-out infinite;
+        }
+
+        .cloud-1 {
+            top: 10%;
+            left: 15%;
+            animation-delay: 0s;
+        }
+
+        .cloud-2 {
+            top: 70%;
+            right: 15%;
+            animation-delay: 3s;
+        }
+
+        @keyframes cloudFloat {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(20px);
+            }
+        }
+
+        .slot-machine-frame {
+            background: linear-gradient(145deg, #c0392b 0%, #a93226 100%);
+            padding: 18px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 750px;
+            position: relative;
+            border: 5px solid #f1c40f;
+            box-shadow: 0 20px 0 #8e44ad,
+                0 30px 60px rgba(0, 0, 0, 0.4),
+                inset 0 2px 10px rgba(255, 255, 255, 0.2);
+            z-index: 10;
+            animation: framePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes framePulse {
+
+            0%,
+            100% {
+                box-shadow: 0 20px 0 #8e44ad, 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 2px 10px rgba(255, 255, 255, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 20px 0 #8e44ad, 0 30px 70px rgba(0, 0, 0, 0.5), inset 0 2px 10px rgba(255, 255, 255, 0.3);
+            }
+        }
+
+        .lights-border {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 3px dotted #fff200;
+            border-radius: 18px;
+            pointer-events: none;
+            box-shadow: 0 0 15px #fff200, inset 0 0 15px rgba(255, 242, 0, 0.3);
+            animation: lightsPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes lightsPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .slot-window {
+            background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            height: 180px;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 8px 16px rgba(0, 0, 0, 0.8),
+                inset 0 -8px 16px rgba(0, 0, 0, 0.6),
+                inset 0 0 40px rgba(0, 0, 0, 0.5);
+            border: 4px solid #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slot-strip {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            text-align: center;
+            transition: transform 0s;
+            will-change: transform;
+        }
+
+        .slot-item {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 65px;
+            font-weight: 900;
+            background: linear-gradient(180deg, #ff6b6b 0%, #ee5a6f 50%, #ff4757 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            padding: 0 10px;
+            filter: drop-shadow(0 4px 8px rgba(255, 71, 87, 0.5)) drop-shadow(0 0 20px rgba(255, 107, 107, 0.4));
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .glass-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right,
+                    rgba(255, 255, 255, 0.05) 0%,
+                    transparent 20%,
+                    transparent 80%,
+                    rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .glass-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom,
+                    transparent 0%,
+                    rgba(255, 255, 255, 0.1) 30%,
+                    rgba(255, 255, 255, 0.15) 50%,
+                    rgba(255, 255, 255, 0.1) 70%,
+                    transparent 100%);
+            transform: translateX(-50%);
+        }
+
+        .glass-overlay::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right,
+                    transparent 0%,
+                    rgba(255, 255, 255, 0.08) 50%,
+                    transparent 100%);
+            transform: translateY(-50%);
+        }
+
+        .winner-indicator {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 25px solid transparent;
+            border-bottom: 25px solid transparent;
+            border-right: 40px solid #f1c40f;
+            filter: drop-shadow(-3px 0 4px rgba(0, 0, 0, 0.4));
+            z-index: 20;
+            animation: indicatorPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes indicatorPulse {
+
+            0%,
+            100% {
+                transform: translateY(-50%) scale(1);
+            }
+
+            50% {
+                transform: translateY(-50%) scale(1.1);
+            }
+        }
+
+        .winner-indicator::after {
+            content: '';
+            position: absolute;
+            right: -50px;
+            top: -12px;
+            width: 24px;
+            height: 24px;
+            background: radial-gradient(circle, #c0392b 0%, #a93226 100%);
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+        }
+
+        /* --- HIỆU ỨNG HOA MAI RƠI --- */
+        .falling-flower {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(circle, #ffd700 0%, #f1c40f 100%);
+            top: -20px;
+            border-radius: 50% 5px 50% 50%;
+            opacity: 0.9;
+            pointer-events: none;
+            z-index: 1;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes falling-left {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(150px, 600px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Custom scrollbar */
+        .panel-inner::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .panel-inner::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        .panel-inner::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--purple-brand) 0%, #9c27b0 100%);
+            border-radius: 10px;
+        }
+
+        .panel-inner::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5c00a3 0%, #7b1fa2 100%);
+        }
+
+        /* --- RESPONSIVE MOBILE --- */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column-reverse;
+                height: auto;
+                border-radius: 20px;
+            }
+
+            .btn-back {
+                top: 15px;
+                left: 15px;
+                padding: 10px 18px;
+            }
+
+            .controls-panel {
+                width: 100%;
+                max-width: 100%;
+                flex: none;
+                border-right: none;
+                border-top: 2px solid rgba(113, 0, 209, 0.1);
+                height: auto;
+                max-height: 800px;
+                overflow: visible;
+            }
+
+            .panel-inner {
+                width: 100%;
+            }
+
+            .controls-panel.collapsed {
+                width: 100%;
+                max-width: 100%;
+                max-height: 0;
+                border-top: none;
+            }
+
+            .toggle-btn {
+                top: -28px;
+                right: 50%;
+                transform: translateX(50%) rotate(90deg);
+                width: 52px;
+                height: 28px;
+                border-radius: 12px 12px 0 0;
+                border-bottom: none;
+                border-left: 2px solid rgba(113, 0, 209, 0.2);
+            }
+
+            .controls-panel.collapsed .toggle-btn i {
+                transform: rotate(180deg);
+            }
+
+            .slot-item {
+                font-size: 40px;
+            }
+
+            .decor-canh-mai {
+                transform: translate(-10%, -10%);
+                width: 180px;
+            }
+
+            .decor-long-den {
+                width: 80px;
+                right: 5px;
+                top: -5px;
+            }
+
+            .slot-machine-frame {
+                padding: 15px;
+                border-radius: 20px;
+            }
+
+            /* Mobile: Thu nhỏ trang trí Tết */
+            .tet-text-top {
+                font-size: 24px;
+                top: 15px;
+                letter-spacing: 2px;
+            }
+
+            .tet-text-bottom {
+                font-size: 16px;
+                bottom: 15px;
+                letter-spacing: 2px;
+            }
+
+            .coin-decor {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            .firework-decor {
+                width: 50px;
+                height: 50px;
+            }
+
+            .firework-decor::before,
+            .firework-decor::after {
+                font-size: 24px;
+            }
+
+            .bamboo-left,
+            .bamboo-right {
+                height: 120px;
+                width: 6px;
+            }
+
+            .lucky-cloud {
+                font-size: 32px;
+            }
+        }
+
+        /* --- WINNER POPUP STYLES (STYLE GUIDE) --- */
+        /* Thiết lập nền Popup về màu trắng */
+        /* Main Popup Container with Tết Theme */
+        div:where(.swal2-container) div:where(.swal2-popup) {
+            background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%) !important;
+            border-radius: 30px !important;
+            padding: 0 !important;
+            border: 5px solid #ff6b6b !important;
+            box-shadow: 0 20px 60px rgba(255, 107, 107, 0.4),
+                0 0 0 10px rgba(255, 215, 0, 0.2),
+                0 0 40px rgba(255, 107, 107, 0.3) !important;
+            position: relative;
+            overflow: visible !important;
+        }
+
+        /* Decorative Lanterns */
+        div:where(.swal2-container) div:where(.swal2-popup)::before,
+        div:where(.swal2-container) div:where(.swal2-popup)::after {
+            content: '🏮';
+            position: absolute;
+            top: -25px;
+            font-size: 50px;
+            animation: swing 3s ease-in-out infinite;
+        }
+
+        div:where(.swal2-container) div:where(.swal2-popup)::before {
+            left: 30px;
+        }
+
+        div:where(.swal2-container) div:where(.swal2-popup)::after {
+            right: 30px;
+            animation-delay: 0.5s;
+        }
+
+        @keyframes swing {
+
+            0%,
+            100% {
+                transform: rotate(-5deg);
+            }
+
+            50% {
+                transform: rotate(5deg);
+            }
+        }
+
+        /* Confetti Background */
+        .popup-content-wrapper {
+            padding: 40px 30px 30px;
+            text-align: center;
+            background-image:
+                radial-gradient(circle, #ffd700 2px, transparent 2px),
+                radial-gradient(circle, #ff6b6b 2px, transparent 2px),
+                radial-gradient(circle, #4ecdc4 2px, transparent 2px);
+            background-size: 50px 50px, 80px 80px, 60px 60px;
+            background-position: 0 0, 40px 40px, 20px 20px;
+            background-repeat: repeat;
+            opacity: 0.95;
+            border-radius: 25px;
+        }
+
+        /* Trophy Icon with Glow */
+        .checkmark-icon {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 15px;
+            font-size: 100px;
+            display: inline-block;
+            animation: bounce 0.8s ease-in-out, glow 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0) scale(1);
+            }
+
+            50% {
+                transform: translateY(-20px) scale(1.1);
+            }
+        }
+
+        @keyframes glow {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 35px rgba(255, 215, 0, 1));
+            }
+        }
+
+        /* Winner Box - Tết Style */
+        .winner-box {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: #ffffff;
+            font-size: 32px;
+            font-weight: 700;
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin: 25px auto;
+            box-shadow: 0 8px 25px rgba(238, 90, 111, 0.5),
+                inset 0 2px 0 rgba(255, 255, 255, 0.3);
+            width: fit-content;
+            min-width: 65%;
+            text-align: center;
+            border: 3px solid #ffd700;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .winner-box::before {
+            content: '✨';
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 28px;
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+
+        .winner-box::after {
+            content: '✨';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 28px;
+            animation: sparkle 1.5s ease-in-out infinite;
+            animation-delay: 0.75s;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.03);
+            }
+        }
+
+        @keyframes sparkle {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: translateY(-50%) scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: translateY(-50%) scale(1.2);
+            }
+        }
+
+        /* Prize Info Container */
+        .prize-info-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed #ffd700;
+        }
+
+        .prize-name-display {
+            font-size: 24px;
+            color: #2d3436;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(90deg, #ff6b6b, #ffd700, #ff6b6b);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 3s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+
+            0%,
+            100% {
+                background-position: 0% center;
+            }
+
+            50% {
+                background-position: 100% center;
+            }
+        }
+
+        .prize-image-display {
+            max-width: 280px;
+            max-height: 220px;
+            width: 100%;
+            object-fit: contain;
+            border-radius: 15px;
+            border: 4px solid #ffd700;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            background: white;
+            padding: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .prize-image-display:hover {
+            transform: scale(1.05) rotate(2deg);
+        }
+
+        /* Custom Button - Year End Party Style */
+        .btn-awesome {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: #ffffff !important;
+            padding: 15px 50px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4),
+                0 0 0 4px rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
+            outline: none !important;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 25px;
+        }
+
+        .btn-awesome::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-awesome:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-awesome:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6),
+                0 0 0 6px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-awesome:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        /* Celebration Message */
+        .celebration-text {
+            font-size: 18px;
+            color: #636e72;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+
+        /* Demo Button */
+        .demo-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(238, 90, 111, 0.4);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(238, 90, 111, 0.6);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+
+    <div class="clouds-container">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+        <div class="cloud cloud-4"></div>
+    </div>
+
+
+
+    <div class="decor-container">
+        <img src="y1-logo.png" class="decor-item decor-lanterns" alt="Lồng Đèn" onerror="this.style.display='none'">
+    </div>
+
+    <!-- Audio Element -->
+    <audio id="spinMusic" src="../audio/Nhạc Quay số JackPot.MP3" loop></audio>
+
+    <div class="container">
+
+        <div class="controls-panel" id="controlsPanel">
+            <button class="toggle-btn" id="toggleBtn" title="Đóng/Mở cài đặt">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <div class="panel-inner">
+                <h1>Thử vận may</h1>
+
+
+
+                <!-- namesInput removed -->
+
+                <div class="setting-group">
+                    <!-- Audio Control -->
+                    <div
+                        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid rgba(113, 0, 209, 0.1); padding-bottom: 10px;">
+                        <label>Âm thanh:</label>
+                        <button id="btnMute"
+                            style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 1px solid rgba(113, 0, 209, 0.2); color: #333; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 12px rgba(113, 0, 209, 0.15);">
+                            <i class="fas fa-volume-up"></i> Bật/Tắt
+                        </button>
+                    </div>
+
+
+                    <div style="margin-top: 10px;">
+                        <label>Chọn giải thưởng:</label>
+                        <select id="prizeSelect"
+                            style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ddd; margin-top: 5px;">
+                            <!-- Options will be loaded from JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <button id="spinBtn" class="btn-spin">QUAY NGAY</button>
+
+                <div class="btn-group-small">
+                    <button onclick="location.reload()" class="btn-small btn-reset" style="width: 100%;">Làm
+                        mới</button>
+                </div>
+
+                <a href="../index.html" class="btn-nav-bottom">
+                    <i class="fas fa-arrow-left"></i> Quay lại Menu
+                </a>
+            </div>
+        </div>
+
+        <div class="slot-panel" id="slotPanel">
+
+            <!-- Pháo hoa -->
+            <div class="tet-decor firework-decor firework-left"></div>
+            <div class="tet-decor firework-decor firework-right"></div>
+
+            <!-- Cây tre -->
+            <div class="tet-decor bamboo-left"></div>
+            <div class="tet-decor bamboo-right"></div>
+
+            <!-- Mây may mắn -->
+            <div class="tet-decor lucky-cloud cloud-1">☁️</div>
+            <div class="tet-decor lucky-cloud cloud-2">☁️</div>
+
+            <div class="slot-machine-frame">
+                <div class="lights-border"></div>
+                <div class="slot-window">
+                    <div class="glass-overlay"></div>
+                    <div class="winner-indicator"></div>
+                    <div class="slot-strip" id="slotStrip">
+                        <div class="slot-item">CHÚC MỪNG NĂM MỚI</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const toggleBtn = document.getElementById('toggleBtn');
+        const controlsPanel = document.getElementById('controlsPanel');
+        toggleBtn.addEventListener('click', () => {
+            controlsPanel.classList.toggle('collapsed');
+        });
+
+        // const namesInput removed
+        // const countDisplay removed
+        const slotStrip = document.getElementById('slotStrip');
+        const spinBtn = document.getElementById('spinBtn');
+        // const resetBtn = document.getElementById('resetBtn');
+        // const excelInput = document.getElementById('excelInput');
+
+
+        const prizeSelect = document.getElementById('prizeSelect');
+        const slotPanel = document.getElementById('slotPanel');
+        const spinMusic = document.getElementById('spinMusic');
+        const btnMute = document.getElementById('btnMute');
+
+        let names = [];
+        let prizes = []; // Global prizes array
+        let isSpinning = false;
+        const ITEM_HEIGHT = 180;
+
+        function loadParticipantsFromStorage() {
+            const stored = localStorage.getItem('lucky_draw_participants');
+            if (stored) {
+                try {
+                    const participants = JSON.parse(stored);
+                    names = participants.map(p => {
+                        let n = p.name || "";
+                        let id = p.id || p.code || p.msnv || "";
+                        if (id) return `${n} - ${id}`;
+                        return n;
+                    });
+                } catch (e) {
+                    console.error("Error loading participants:", e);
+                    names = [];
+                }
+            }
+
+            if (!isSpinning) {
+                slotStrip.style.transition = 'none';
+                slotStrip.style.transform = 'translateY(0px)';
+                slotStrip.innerHTML = `<div class="slot-item" style="font-size: 40px; color: #555;">${names.length > 0 ? 'Sẵn sàng' : 'Chưa có dữ liệu'}</div>`;
+            }
+        }
+
+        // Init
+        loadParticipantsFromStorage();
+        loadPrizesFromStorage();
+
+        function loadPrizesFromStorage() {
+            const storedPrizes = localStorage.getItem('lucky_draw_prizes');
+            prizeSelect.innerHTML = '<option value="">-- CHỌN GIẢI THƯỞNG --</option>';
+
+            if (storedPrizes) {
+                try {
+                    prizes = JSON.parse(storedPrizes);
+                    prizes.forEach((p, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        const status = p.quantity <= 0 ? " (HẾT)" : "";
+                        option.text = `${p.name}${status}`;
+                        if (p.quantity <= 0) option.disabled = true;
+                        prizeSelect.appendChild(option);
+                    });
+                } catch (e) {
+                    console.error("Error loading prizes:", e);
+                    prizes = [];
+                }
+            }
+
+            // Auto select first available
+            const firstAvailable = prizes.findIndex(p => p.quantity > 0);
+            if (firstAvailable !== -1) {
+                prizeSelect.value = firstAvailable;
+            }
+        }
+
+        // Helper to extract ID from "Name - ID"
+        function extractId(text) {
+            if (!text) return "";
+            const separatorIndex = text.lastIndexOf(" - ");
+            if (separatorIndex !== -1) {
+                return text.substring(separatorIndex + 3).trim();
+            }
+            return text; // Fallback to full text if no separator
+        }
+
+        function buildStrip(winnerText, duration) {
+            slotStrip.innerHTML = '';
+            const fragment = document.createDocumentFragment();
+
+            // Tính số vòng quay dựa trên thời gian: mỗi giây = 8 items
+            // Đảm bảo ít nhất 24 items (3 giây * 8)
+            let dummyCount = Math.max(24, duration * 8);
+
+            for (let i = 0; i < dummyCount; i++) {
+                let randomText = names[Math.floor(Math.random() * names.length)];
+                let div = document.createElement('div');
+                div.className = 'slot-item';
+                // SHOW ONLY ID
+                div.textContent = extractId(randomText);
+                fragment.appendChild(div);
+            }
+            let winnerDiv = document.createElement('div');
+            winnerDiv.className = 'slot-item';
+            // SHOW ONLY ID for Winner
+            winnerDiv.textContent = extractId(winnerText);
+
+            winnerDiv.style.background = 'linear-gradient(180deg, #ffd700 0%, #ffed4e 50%, #ffc107 100%)';
+            winnerDiv.style.webkitBackgroundClip = 'text';
+            winnerDiv.style.webkitTextFillColor = 'transparent';
+            winnerDiv.style.backgroundClip = 'text'; // Lint fix
+            winnerDiv.style.filter = 'drop-shadow(0 4px 12px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 30px rgba(255, 193, 7, 0.6))';
+            fragment.appendChild(winnerDiv);
+            slotStrip.appendChild(fragment);
+            return dummyCount * ITEM_HEIGHT;
+        }
+
+        spinBtn.addEventListener('click', () => {
+            // 1. Validate chọn quà
+            if (prizeSelect.value === "") {
+                Swal.fire('Chưa chọn quà', 'Vui lòng chọn giải thưởng trước khi quay!', 'warning');
+                return;
+            }
+
+            // 2. Validate danh sách tên
+            if (names.length === 0) {
+                Swal.fire('Chưa có dữ liệu', 'Vui lòng nhập danh sách tên!', 'warning');
+                return;
+            }
+            if (isSpinning) return;
+
+            if (window.innerWidth > 768 && !controlsPanel.classList.contains('collapsed')) {
+                controlsPanel.classList.add('collapsed');
+            }
+
+            // Play Music
+            if (spinMusic) {
+                spinMusic.currentTime = 0;
+                spinMusic.play().catch(e => console.log("Audio play failed:", e));
+            }
+
+            isSpinning = true;
+            spinBtn.disabled = true;
+            // namesInput.disabled = true;
+
+            const winnerIndex = Math.floor(Math.random() * names.length);
+            const winnerName = names[winnerIndex];
+            const duration = 25; // Fixed 25 seconds
+            const targetOffset = buildStrip(winnerName, duration);
+
+            // Reset về vị trí ban đầu
+            slotStrip.style.transition = 'none';
+            slotStrip.style.transform = 'translateY(0px)';
+            slotStrip.offsetHeight; // Force reflow
+
+            // Sử dụng requestAnimationFrame để đảm bảo animation chạy mượt
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    slotStrip.style.transition = `transform ${duration}s cubic-bezier(0.25, 0.1, 0.25, 1)`;
+                    slotStrip.style.transform = `translateY(-${targetOffset}px)`;
+                });
+            });
+
+            const selectedIndex = parseInt(prizeSelect.value);
+            const selectedPrize = prizes[selectedIndex] || { name: "Giải Thưởng", item: "Phần quà may mắn", image: "" };
+
+            slotStrip.addEventListener('transitionend', () => {
+                // --- SAVE WINNER LOGIC ---
+                try {
+                    const winnersHistory = JSON.parse(localStorage.getItem('lucky_draw_winners') || '[]');
+
+                    // Parse Name and ID from "Name - ID" format
+                    let wName = winnerName;
+                    let wId = "";
+
+                    // Simple check for " - " separator
+                    const separatorIndex = winnerName.lastIndexOf(" - ");
+                    if (separatorIndex !== -1) {
+                        wName = winnerName.substring(0, separatorIndex).trim();
+                        wId = winnerName.substring(separatorIndex + 3).trim();
+                    }
+
+                    winnersHistory.push({
+                        name: wName,
+                        id: wId,
+                        prize: selectedPrize.name || "Giải Thưởng",
+                        prizeItem: selectedPrize.item || "Phần quà",
+                        timestamp: Date.now(),
+                        gameType: "Vòng Quay May Mắn"
+                    });
+
+                    localStorage.setItem('lucky_draw_winners', JSON.stringify(winnersHistory));
+                    console.log("Saved winner:", wName);
+                } catch (e) {
+                    console.error("Error saving winner:", e);
+                }
+
+                // --- REMOVE WINNER FROM LIST ---
+                try {
+                    let currentParticipants = JSON.parse(localStorage.getItem('lucky_draw_participants') || '[]');
+                    let wID = String(wId).trim(); // wId parsed above as winner ID
+
+                    let initialCount = currentParticipants.length;
+                    currentParticipants = currentParticipants.filter(p => {
+                        let pId = String(p.id || p.msnv || p.code || p.employeeCode || "").trim();
+                        let pNameObj = String(p.name || "").trim();
+                        let wNameStr = String(wName || "").trim();
+
+                        // 1. Match by ID if both exist
+                        if (wID && pId && wID === pId) return false;
+
+                        // 2. Fallback: Match by Name if ID matches failed or missing
+                        // Only remove if Name matches and (ID is missing in one of them)
+                        if ((!wID || !pId) && wNameStr && pNameObj === wNameStr) return false;
+
+                        return true;
+                    });
+
+                    if (currentParticipants.length !== initialCount) {
+                        localStorage.setItem('lucky_draw_participants', JSON.stringify(currentParticipants));
+                        console.log("Removed winner from list:", wID, wName);
+
+                        // Update local names array immediately
+                        names = currentParticipants.map(p => {
+                            let n = p.name || "";
+                            let id = p.id || p.code || p.msnv || "";
+                            if (id) return `${n} - ${id}`;
+                            return n;
+                        });
+                    }
+                } catch (e) { console.error(e); }
+                // -------------------------
+
+                showWinnerPopup(winnerName, selectedPrize).then(() => {
+                    // Logic xóa người chơi đã bị loại bỏ
+                });
+                isSpinning = false;
+                spinBtn.disabled = false;
+                // namesInput.disabled = false;
+
+                // Stop Music
+                if (spinMusic) {
+                    spinMusic.pause();
+                    spinMusic.currentTime = 0;
+                }
+            }, { once: true });
+        });
+
+        // --- MUTE BUTTON LOGIC ---
+        let isMuted = false;
+        if (btnMute && spinMusic) {
+            btnMute.addEventListener('click', () => {
+                isMuted = !isMuted;
+                spinMusic.muted = isMuted;
+
+                // Update Icon
+                const icon = btnMute.querySelector('i');
+                if (isMuted) {
+                    icon.classList.remove('fa-volume-up');
+                    icon.classList.add('fa-volume-mute');
+                    btnMute.style.color = "#999"; // Grey when muted
+                    btnMute.style.borderColor = "#999";
+                } else {
+                    icon.classList.remove('fa-volume-mute');
+                    icon.classList.add('fa-volume-up');
+                    icon.classList.remove('fa-volume-mute');
+                    icon.classList.add('fa-volume-up');
+                    btnMute.style.color = "#333"; // Theme color (Dark)
+                    btnMute.style.borderColor = "rgba(113, 0, 209, 0.2)";
+                }
+            });
+        }
+
+        function showWinnerPopup(winnerName, prizeObject) {
+            const duration = 10000;
+            const end = Date.now() + duration;
+
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+
+            const interval = setInterval(function () {
+                if (Date.now() > end) {
+                    return clearInterval(interval);
+                }
+                confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 } });
+            }, 2000);
+
+            return Swal.fire({
+                html: `
+            <div class="popup-content-wrapper">
+                <div class="ribbon-decor ribbon-left"></div>
+                <div class="ribbon-decor ribbon-right"></div>
+                
+                <div class="animate__animated animate__tada">
+                    <i class="fa-solid fa-trophy checkmark-icon"></i>
+                </div>
+                
+                <h2 class="animate__animated animate__backInDown animate__delay-1s" 
+                    style="color: #d63031; font-size: 32px; margin: 0 0 10px 0; font-weight: 900; text-transform: uppercase;">
+                    CHÚC MỪNG
+                </h2>
+                
+                <div class="winner-box animate__animated animate__zoomIn animate__delay-1s" style="animation-delay: 0.8s;">
+                    ${winnerName}
+                </div>
+                
+                <div class="prize-info-container animate__animated animate__fadeInUp animate__delay-2s" style="animation-delay: 1.2s;">
+                    <div class="prize-name-display">${prizeObject.name || 'Giải Thưởng'}</div>
+                    ${prizeObject.image ? `
+                    <div class="prize-glow-circle">
+                        <img src="${prizeObject.image}" class="prize-image-display" alt="Prize Image">
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+        `,
+                showConfirmButton: true,
+                confirmButtonText: 'Đóng',
+                buttonsStyling: false,
+
+                // --- SỬA LỖI TẠI ĐÂY ---
+                // 1. Tách animation ra khỏi customClass
+                customClass: {
+                    confirmButton: 'btn-awesome btn-pulse',
+                    // popup: '...' -> XÓA DÒNG NÀY (Không để animation ở đây)
+                },
+
+                // 2. Cấu hình hiệu ứng hiện ra riêng
+                showClass: {
+                    popup: 'animate__animated animate__zoomIn'
+                },
+
+                // 3. Cấu hình hiệu ứng biến mất riêng (Quan trọng để đóng popup mượt mà)
+                hideClass: {
+                    popup: 'animate__animated animate__zoomOut'
+                },
+                // -----------------------
+
+                backdrop: `rgba(0,0,0,0.7)`,
+                width: '650px',
+                padding: '0',
+                willClose: () => {
+                    clearInterval(interval);
+                }
+            });
+        }
+
+
+
+        namesInput.addEventListener('input', updateList);
+        updateList();
+
+        function createFallingFlower() {
+            const flower = document.createElement('div');
+            flower.classList.add('falling-flower');
+            flower.style.left = Math.random() * 40 + '%';
+            const size = Math.random() * 10 + 10;
+            flower.style.width = `${size}px`;
+            flower.style.height = `${size}px`;
+            const duration = Math.random() * 3 + 3;
+            flower.style.animation = `falling-left ${duration}s linear`;
+            slotPanel.appendChild(flower);
+            setTimeout(() => {
+                flower.remove();
+            }, duration * 1000);
+        }
+
+        setInterval(createFallingFlower, 400);
+
+        // --- TÍNH NĂNG MỚI: TỰ ĐỘNG TẢI DỮ LIỆU TỪ HỆ THỐNG (LOCALSTORAGE) ---
+        function loadDataFromSystem() {
+            console.log("🔄 Đang tải dữ liệu từ hệ thống...");
+            const storedParticipants = localStorage.getItem('lucky_draw_participants');
+
+            if (storedParticipants) {
+                try {
+                    let parsedParticipants = JSON.parse(storedParticipants);
+
+                    // --- FILTER OUT WINNERS ---
+                    const storedWinners = JSON.parse(localStorage.getItem('lucky_draw_winners') || '[]');
+                    const winnerIds = new Set(storedWinners.map(w => w.id ? String(w.id).trim() : null).filter(x => x));
+
+                    parsedParticipants = parsedParticipants.filter(p => {
+                        let pId = p.id || p.msnv || p.code || p.employeeCode || p.ma_nv || null;
+                        pId = pId ? String(pId).trim() : null;
+
+                        if (pId && winnerIds.has(pId)) return false;
+                        return true;
+                    });
+                    // --------------------------
+
+                    if (Array.isArray(parsedParticipants) && parsedParticipants.length > 0) {
+                        // Format: Tên - Mã NV (nếu có)
+                        const formattedList = parsedParticipants.map(p => {
+                            const name = p.name || "";
+                            const id = p.id ? ` - ${p.id}` : "";
+                            return `${name}${id}`;
+                        }).join('\n');
+
+                        namesInput.value = formattedList;
+                        updateList();
+                        console.log(`✅ Đã tải ${parsedParticipants.length} người tham gia từ hệ thống.`);
+
+                        // Thông báo nhỏ (Toast)
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                        Toast.fire({
+                            icon: 'success',
+                            title: `Đã tải ${parsedParticipants.length} người từ hệ thống`
+                        });
+                    }
+                } catch (e) {
+                    console.error("Lỗi khi tải dữ liệu nhân viên:", e);
+                }
+            }
+        }
+
+        // Gọi hàm ngay khi tải trang
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDataFromSystem();
+            loadPrizesToDropdown();
+        });
+
+        function loadPrizesToDropdown() {
+            const storedPrizes = localStorage.getItem('lucky_draw_prizes');
+            prizes = []; // Reset global prizes
+
+            if (storedPrizes) {
+                try {
+                    prizes = JSON.parse(storedPrizes);
+                } catch (e) {
+                    console.error("Lỗi khi parse giải thưởng:", e);
+                    prizes = [];
+                }
+            }
+
+            // Populate dropdown
+            prizeSelect.innerHTML = '';
+
+            if (!Array.isArray(prizes) || prizes.length === 0) {
+                // Hiển thị option mặc định nếu không có quà
+                const option = document.createElement('option');
+                option.value = "";
+                option.textContent = "--- Vui lòng nhập danh sách quà ---";
+                prizeSelect.appendChild(option);
+            } else {
+                prizes.forEach((prize, index) => {
+                    const option = document.createElement('option');
+                    option.value = index; // Use index as value
+
+                    const status = prize.quantity <= 0 ? " (HẾT)" : "";
+                    option.textContent = `${prize.name}${status}`;
+                    option.disabled = prize.quantity <= 0;
+
+                    prizeSelect.appendChild(option);
+                });
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>

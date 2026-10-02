@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Survival Derby - V3 (Realistic)</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;900&family=Roboto+Condensed:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="icon" href="../images.png" type="image/x-icon">
+
+
+    <style>
+        /* --- 1. GLOBAL & LAYOUT (From V2) --- */
+        :root {
+            --tet-red: #D32F2F;
+            --tet-gold: #FFD700;
+            --tet-yellow: #FFEB3B;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-light: #ffffff;
+            --tet-red: #D32F2F;
+            --tet-gold: #FFD700;
+            --tet-yellow: #FFEB3B;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-light: #ffffff;
+            --text-dim: #dddddd;
+
+            /* Ticke.me Fake Vars */
+            --primary-color: #d63031;
+            --accent-color: #f1c40f;
+            --purple-brand: #7100d1;
+            --slot-bg: #ecf0f1;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Roboto Condensed', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+        }
+
+        /* Background */
+        .bg-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("../FINAL.jpg");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        .bg-image::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 107, 107, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(241, 196, 15, 0.2) 0%, transparent 50%),
+                linear-gradient(135deg, rgba(113, 0, 209, 0.15) 0%, rgba(188, 86, 252, 0.25) 100%);
+            z-index: 0;
+            pointer-events: none;
+            animation: gradientShift 10s ease infinite;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        /* Container */
+        .main-game-container {
+            width: 95%;
+            max-width: 1400px;
+            height: 90vh;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            display: flex;
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* --- CLOUDS ANIMATION --- */
+        .clouds-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 100px;
+            filter: blur(20px);
+            animation: floatCloud linear infinite;
+        }
+
+        .cloud::after,
+        .cloud::before {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .cloud::after {
+            width: 100px;
+            height: 100px;
+            top: -50px;
+            left: 50px;
+        }
+
+        .cloud::before {
+            width: 120px;
+            height: 120px;
+            top: -70px;
+            left: 130px;
+        }
+
+        .cloud-1 {
+            width: 500px;
+            height: 150px;
+            top: 10%;
+            left: -600px;
+            animation-duration: 60s;
+            opacity: 0.6;
+        }
+
+        .cloud-2 {
+            width: 600px;
+            height: 180px;
+            top: 25%;
+            left: -700px;
+            animation-duration: 80s;
+            animation-delay: 10s;
+            opacity: 0.4;
+            transform: scale(1.2);
+        }
+
+        .cloud-3 {
+            width: 400px;
+            height: 120px;
+            top: 5%;
+            left: -500px;
+            animation-duration: 50s;
+            animation-delay: 25s;
+            opacity: 0.5;
+        }
+
+        .cloud-4 {
+            width: 550px;
+            height: 160px;
+            top: 15%;
+            left: -600px;
+            animation-duration: 70s;
+            animation-delay: 5s;
+            opacity: 0.3;
+            transform: scale(0.9);
+        }
+
+        @keyframes floatCloud {
+            0% {
+                left: -800px;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        /* --- LEFT PANEL (From V2) --- */
+        .controls-panel {
+            flex: 0 0 320px;
+            width: 320px;
+            max-width: 320px;
+            border-right: 2px solid rgba(113, 0, 209, 0.1);
+            background: linear-gradient(180deg, rgba(235, 235, 240, 0.95) 0%, rgba(225, 225, 235, 0.95) 100%);
+            position: relative;
+            z-index: 10;
+        }
+
+        .panel-inner {
+            width: 100%;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .panel-header {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 2rem;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--purple-brand) 0%, #9c27b0 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 4px rgba(113, 0, 209, 0.1));
+        }
+
+        .btn-nav-bottom {
+            margin-top: 20px;
+            padding: 15px 0;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            color: #666;
+            background: #f5f5f5;
+            text-align: center;
+            text-decoration: none;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-nav-bottom:hover {
+            background: #e0e0e0;
+            color: #333;
+            border-color: #bbb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .prize-card {
+            background: #fff;
+            border: 2px solid rgba(113, 0, 209, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(113, 0, 209, 0.05);
+            margin-bottom: 5px;
+        }
+
+        .prize-name {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 1.6rem;
+            color: var(--purple-brand);
+            margin-bottom: 5px;
+            text-shadow: none;
+            letter-spacing: 1px;
+        }
+
+        .prize-count {
+            font-size: 1rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        .settings-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #fff;
+            border: 2px solid rgba(113, 0, 209, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-direction: row;
+        }
+
+        .input-group label {
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 0;
+            color: #555;
+            text-shadow: none;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 130px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(113, 0, 209, 0.2);
+            background: #f8f9fa;
+            color: #333;
+            text-align: center;
+            font-weight: bold;
+            font-family: inherit;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .input-group select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%237100d1%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 10px;
+            padding-right: 25px;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: var(--purple-brand);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(113, 0, 209, 0.1);
+        }
+
+        .timer-display {
+            font-family: 'Courier New', monospace;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--purple-brand);
+            text-align: center;
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid rgba(113, 0, 209, 0.2);
+            box-shadow: 0 2px 8px rgba(113, 0, 209, 0.1);
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: 900;
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            color: #333;
+            border: 2px solid rgba(113, 0, 209, 0.2);
+            box-shadow: 0 4px 12px rgba(113, 0, 209, 0.15);
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            border-color: #7100d1;
+            color: #7100d1;
+            box-shadow: 0 6px 20px rgba(113, 0, 209, 0.3);
+            background: linear-gradient(135deg, #fff 0%, #f3e5f5 100%);
+        }
+
+        .btn-reset {
+            background: #fff;
+            color: #666;
+            border: 2px solid rgba(113, 0, 209, 0.1);
+        }
+
+        .btn-reset:hover {
+            background: #f8f9fa;
+            color: var(--purple-brand);
+            border-color: var(--purple-brand);
+        }
+
+        /* --- GAME STAGE (Right Panel) --- */
+        .game-stage {
+            flex-grow: 1;
+            position: relative;
+            background: transparent;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* --- V3 GAME ELEMENTS --- */
+        #world-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            overflow: visible;
+            will-change: transform;
+        }
+
+        .horse-runner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 80px;
+            height: 64px;
+            margin-left: -40px;
+            margin-top: -32px;
+            will-change: transform;
+        }
+
+        /* Rank Board (Adapted for Game Stage) */
+        .rank-board {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 180px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            padding: 15px;
+            color: white;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .rank-title {
+            text-align: center;
+            font-weight: 900;
+            border-bottom: 2px solid #444;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            color: #aaa;
+            letter-spacing: 1px;
+            font-size: 12px;
+        }
+
+        .r-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 5px 0;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .r-1 {
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        .strat-tag {
+            font-size: 9px;
+            padding: 1px 4px;
+            border-radius: 4px;
+            margin-left: 5px;
+            text-transform: uppercase;
+            color: #fff;
+        }
+
+        /* Scenario Alert */
+        #scenario-alert {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(27, 94, 32, 0.95);
+            color: #fff;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 24px;
+            pointer-events: none;
+            border: 3px solid #66bb6a;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 150;
+            text-align: center;
+        }
+
+        #scenario-alert span {
+            display: block;
+            font-size: 14px;
+            color: #a5d6a7;
+            font-weight: normal;
+            margin-top: 5px;
+        }
+
+        /* Winner Screen (Adapted) */
+        #winner-screen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            backdrop-filter: blur(8px);
+        }
+
+        .win-box {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 30px;
+            text-align: center;
+            border: 4px solid #ffca28;
+            animation: popUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(15px);
+            min-width: 600px;
+            max-height: 96%;
+            overflow-y: auto;
+        }
+
+        #win-canvas {
+            width: 300px;
+            height: 225px;
+            margin: 20px 0;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .win-title {
+            font-size: 32px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0;
+            display: none;
+            /* Controlled by JS */
+        }
+
+        .win-name {
+            font-size: 48px;
+            color: #D32F2F;
+            margin: 0;
+            font-weight: 900;
+            text-shadow: none;
+        }
+
+        /* Top N về đích */
+        #win-list {
+            display: grid;
+            grid-auto-flow: column;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 16px;
+            width: 100%;
+            max-width: 760px;
+        }
+
+        .wl-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f5f0ff;
+            border-radius: 12px;
+            padding: 6px 14px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            text-align: left;
+            min-width: 0;
+        }
+
+        .wl-rank {
+            flex: 0 0 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #7100d1;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+        }
+
+        .wl-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .wl-top1 .wl-rank { background: #FFD700; color: #333; }
+        .wl-top2 .wl-rank { background: #C0C0C0; color: #333; }
+        .wl-top3 .wl-rank { background: #CD7F32; }
+
+        .crown {
+            font-size: 50px;
+            margin: 0;
+            animation: float 2s infinite ease-in-out;
+        }
+
+        @keyframes popUp {
+            from {
+                transform: scale(0)
+            }
+
+            to {
+                transform: scale(1)
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+
+    <!-- Background Music -->
+    <audio id="bgMusic" loop>
+        <source src="../audio/Nh%E1%BA%A1c%20%C4%91ua%20ng%E1%BB%B1a.MP3" type="audio/mpeg">
+    </audio>
+
+    <div class="decor-container">
+        <img src="../Ticke.me Fake/y1-logo.png" class="decor-item decor-lanterns" alt="Lồng Đèn"
+            onerror="this.style.display='none'" style="position:fixed; top:60px; right:50px; width:150px; z-index:1;">
+    </div>
+
+    <!-- CLOUDS BACKGROUND -->
+    <div class="clouds-container">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+        <div class="cloud cloud-4"></div>
+    </div>
+
+    <div class="main-game-container">
+        <!-- LEFT PANEL: CONTROLS -->
+        <div class="controls-panel">
+            <div class="panel-inner">
+                <div class="panel-header">ĐUA NGỰA <span
+                        style="font-size: 0.5em; vertical-align: super; color: #FFD700;">V3</span></div>
+
+
+
+                <div class="prize-card">
+                    <div class="prize-name" id="prize-name">ĐANG TẢI...</div>
+                    <div class="prize-count" id="prize-count">---</div>
+                </div>
+
+                <div class="settings-form">
+                    <!-- Audio Control -->
+                    <div
+                        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid rgba(113, 0, 209, 0.1); padding-bottom: 10px;">
+                        <label>ÂM THANH</label>
+                        <button id="btn-mute" onclick="toggleMusic()"
+                            style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 1px solid rgba(113, 0, 209, 0.2); color: #333; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 12px rgba(113, 0, 209, 0.15); display: flex; align-items: center; gap: 5px;">
+                            🔊 BẬT NHẠC
+                        </button>
+                    </div>
+
+                    <div class="input-group">
+                        <label>CHỌN QUÀ</label>
+                        <select id="inp-prize" onchange="changePrize()">
+                            <option value="-1">---</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>SỐ NGỰA</label>
+                        <input type="number" id="inp-qty" value="12" min="2" max="50">
+                    </div>
+                    <div class="input-group">
+                        <label>THỜI GIAN KẾT THÚC (giây)</label>
+                        <input type="number" id="inp-time" value="30" min="10" max="300">
+                    </div>
+                </div>
+
+                <div class="timer-display" id="timer" style="display:none">00:00.0</div>
+
+                <button class="btn-action btn-start" id="btn-start" onclick="startGame()">🏁 BẮT ĐẦU</button>
+                <button class="btn-action btn-reset" id="btn-reset" onclick="resetGame()">🔄 LÀM MỚI</button>
+
+                <a href="../index.html" class="btn-nav-bottom">
+                    ⬅ QUAY VỀ MENU
+                </a>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: GAME STAGE -->
+        <div class="game-stage" id="gameStage">
+            <div id="scenario-alert">MODE NAME<span>Description</span></div>
+
+            <div class="rank-board">
+                <div class="rank-title">BẢNG XẾP HẠNG</div>
+                <div id="rank-list">---</div>
+            </div>
+
+            <div id="world-layer"></div>
+            <canvas id="gameCanvas"></canvas>
+
+            <div id="winner-screen">
+                <div class="win-box">
+                    <div class="crown">👑</div>
+                    <h2 class="win-title">NHÀ VÔ ĐỊCH</h2>
+                    <canvas id="win-canvas" width="400" height="300" style="display:none"></canvas>
+                    <h1 id="win-name" class="win-name">#1</h1>
+                    <div id="win-id" class="win-subtitle"
+                        style="color:#333; font-size:1.8rem; margin-top:10px; background: #f0f0f0; padding: 5px 20px; border-radius: 30px; display: inline-block;">
+                        ---
+                    </div>
+                    <div id="win-prize" class="win-subtitle"
+                        style="color:#7100d1; font-size:1.5rem; font-weight:bold; margin-top:10px;">GIẢI: ---</div>
+                    <div id="win-list"></div>
+                    <img id="win-prize-img" src=""
+                        style="display:none; width: 160px; height: 160px; object-fit: contain; margin-top: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); border-radius: 15px; padding: 10px; background: white;">
+                    <button class="btn-action btn-start" onclick="resetGame()"
+                        style="margin-top: 20px; font-size:14px; padding:10px;">ĐUA VÁN MỚI</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script>
+        const horseGifSrc = 'horse.gif';
+        const horseImgStatic = new Image();
+        horseImgStatic.src = horseGifSrc;
+
+        // --- AUDIO SYSTEM ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        // Music Control
+        const bgMusic = document.getElementById('bgMusic');
+        const btnMute = document.getElementById('btn-mute');
+
+        function toggleMusic() {
+            if (bgMusic.paused) {
+                bgMusic.play().then(() => {
+                    updateMuteButton();
+                }).catch(e => console.error("Music play failed:", e));
+            } else {
+                bgMusic.pause();
+                updateMuteButton();
+            }
+        }
+
+        function updateMuteButton() {
+            if (!bgMusic.paused) {
+                btnMute.innerText = "🔇 TẮT NHẠC";
+            } else {
+                btnMute.innerText = "🔊 BẬT NHẠC";
+            }
+        }
+
+        // Try to play music on first interaction
+        document.addEventListener('click', () => {
+            if (bgMusic.paused) {
+                bgMusic.play().then(updateMuteButton).catch(e => { });
+            }
+        }, { once: true });
+
+        let fireworksInterval = null;
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+
+            if (type === 'whistle') {
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now); osc.frequency.linearRampToValueAtTime(1500, now + 0.1);
+                gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0, now + 0.5); osc.start(now); osc.stop(now + 0.5);
+            } else if (type === 'slip') {
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.3); osc.start(now); osc.stop(now + 0.3);
+            } else if (type === 'fireworks_start') {
+                if (fireworksInterval) clearInterval(fireworksInterval);
+                playSound('fireworks_oneshot'); // Play immediately
+                fireworksInterval = setInterval(() => {
+                    playSound('fireworks_oneshot');
+                }, 1000); // Repeat every 1 second
+            } else if (type === 'fireworks_stop') {
+                if (fireworksInterval) {
+                    clearInterval(fireworksInterval);
+                    fireworksInterval = null;
+                }
+            } else if (type === 'fireworks_oneshot') {
+                // Simulate bursts of noise
+                for (let i = 0; i < 15; i++) {
+                    let t = now + (Math.random() * 2);
+                    let dur = 0.1 + Math.random() * 0.2;
+
+                    let bufferSize = audioCtx.sampleRate * dur;
+                    let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    let data = buffer.getChannelData(0);
+                    for (let j = 0; j < bufferSize; j++) {
+                        data[j] = Math.random() * 2 - 1;
+                    }
+
+                    let noise = audioCtx.createBufferSource();
+                    noise.buffer = buffer;
+                    let gain = audioCtx.createGain();
+
+                    let filter = audioCtx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 500 + Math.random() * 1000;
+
+                    noise.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    gain.gain.setValueAtTime(0.5, t);
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + dur);
+
+                    noise.start(t);
+                }
+            } else if (type === 'win') {
+                let f = [523, 659, 784, 1046];
+                f.forEach((freq, i) => {
+                    let o = audioCtx.createOscillator(); let g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination);
+                    o.type = 'square'; o.frequency.value = freq; g.gain.setValueAtTime(0.05, now + i * 0.1); g.gain.linearRampToValueAtTime(0, now + i * 0.1 + 0.3);
+                    o.start(now + i * 0.1); o.stop(now + i * 0.1 + 0.3);
+                });
+            }
+        }
+
+        // STATIC IMAGE FOR WINNER POPUP - GLOBAL DEFINITION
+        // const horseImgStatic = new Image();
+        // horseImgStatic.src = 'horse.gif';
+
+        // --- PHYSICS & GAME SETUP ---
+        const ENGINE = Matter.Engine, BODIES = Matter.Bodies, COMPOSITE = Matter.Composite, BODY = Matter.Body;
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gameStage = document.getElementById('gameStage');
+        let width = gameStage.offsetWidth, height = gameStage.offsetHeight;
+        canvas.width = width; canvas.height = height;
+
+        window.addEventListener('resize', () => {
+            width = gameStage.offsetWidth; height = gameStage.offsetHeight;
+            canvas.width = width; canvas.height = height;
+        });
+
+        const MAP_LENGTH = 10000;
+        const TOP_MARGIN = 120; // Reduced height
+        const START_LINE = 200;
+        const FINISH_LINE = MAP_LENGTH - 600;
+        const TOP_N = 10; // Lấy N người về đích đầu tiên
+
+        // Bám đuổi: trong khoảng CATCHUP_FREE so với ngựa dẫn đầu thì chạy tự nhiên (giữ khoảng cách, không tụ lại),
+        // bị bỏ xa hơn mức đó thì được tăng tốc dần để không tụt quá xa
+        const CATCHUP_FREE = 650;  // px
+        const CATCHUP_RANGE = 600; // px: vượt quá CATCHUP_FREE thêm chừng này thì tăng tốc tối đa
+        const CATCHUP_MAX = 0.5;   // tăng tối đa +50% tốc độ
+
+        const engine = ENGINE.create(); engine.gravity.y = 0;
+        const world = engine.world;
+
+        let ducks = []; // Horses
+        let bananas = [];
+        let logs = [];
+        let dusts = [];
+        let finishers = []; // Thứ tự ngựa về đích
+        let winnersNeeded = TOP_N; // Số ngựa cần về đích để kết thúc ván
+        let raceTime = 30;  // Thời gian (giây) để ngựa thứ TOP_N về đích => kết thúc ván
+        let paceMult = 1;   // Hệ số tốc độ chung để về đích đúng thời gian đã đặt
+        let raceFrames = 0; // Số khung hình đã chạy (bù cho màn hình 120Hz)
+
+        // STRATEGIES
+        const STRATEGIES = {
+            'LEADER': { name: 'Dẫn Đầu', color: '#4caf50', boostStart: 1.15, boostEnd: 0.9 },
+            'CLOSER': { name: 'Nước Rút', color: '#f44336', boostStart: 0.9, boostEnd: 1.2 },
+            'PACER': { name: 'Bền Bỉ', color: '#2196f3', boostStart: 1.0, boostEnd: 1.05 },
+            'WILD': { name: 'Điên Cuồng', color: '#9c27b0', boostStart: 1.05, boostEnd: 1.05 }
+        };
+
+        // STATIC IMAGE FOR WINNER POPUP
+        // STATIC IMAGE FOR WINNER POPUP (Already declared above)
+        // const horseImgStatic = new Image();
+        // horseImgStatic.src = 'horse.gif';
+
+        let isRacing = false;
+        let isRainMode = false;
+        let startTime = 0;
+        let cameraX = 0;
+        let globalTimer = 0;
+        let flashOpacity = 0;
+
+        // --- DATA MANAGEMENT (From V2) ---
+        let prizes = [];
+        let currentPrizeIndex = -1;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadCurrentPrize();
+            // Thời gian kết thúc đã đặt lần trước
+            try {
+                const savedTime = localStorage.getItem('horse_v3_time');
+                if (savedTime) document.getElementById('inp-time').value = savedTime;
+            } catch (e) { }
+            // Load Participants Count
+            const storedParticipants = localStorage.getItem('lucky_draw_participants');
+            if (storedParticipants) {
+                try {
+                    let parts = JSON.parse(storedParticipants);
+                    if (!Array.isArray(parts)) {
+                        console.warn("Stored participants is not an array, resetting.");
+                        parts = [];
+                    }
+                    const qtyInput = document.getElementById('inp-qty');
+                    if (qtyInput) {
+                        qtyInput.value = parts.length > 0 ? parts.length : 10; // Default to 10 if 0
+                    }
+                } catch (e) {
+                    console.error("Error loading participants for count:", e);
+                }
+            }
+        });
+
+        function loadCurrentPrize() {
+            try {
+                const storedPrizes = localStorage.getItem('lucky_draw_prizes');
+                if (storedPrizes) {
+                    prizes = JSON.parse(storedPrizes);
+                    currentPrizeIndex = prizes.findIndex(p => p.quantity > 0);
+                    updatePrizeUI();
+                }
+            } catch (e) {
+                console.error("Error loading prizes:", e);
+                prizes = [];
+            }
+        }
+
+        function updatePrizeUI() {
+            const nameEl = document.getElementById('prize-name');
+            const countEl = document.getElementById('prize-count');
+            const btnStart = document.getElementById('btn-start');
+            const select = document.getElementById('inp-prize');
+
+            // Update Select Options
+            select.innerHTML = '<option value="-1">---</option>';
+            prizes.forEach((p, idx) => {
+                let opt = document.createElement('option');
+                opt.value = idx;
+                opt.text = `${p.name} (${p.quantity})`;
+                if (p.quantity <= 0) opt.disabled = true;
+                select.appendChild(opt);
+            });
+
+            if (currentPrizeIndex !== -1) {
+                const p = prizes[currentPrizeIndex];
+                nameEl.innerText = p.name;
+                countEl.innerText = `Còn lại: ${p.quantity}`;
+                select.value = currentPrizeIndex;
+                btnStart.disabled = false;
+            } else {
+                nameEl.innerText = "HẾT QUÀ";
+                countEl.innerText = "Vui lòng nạp thêm";
+                btnStart.disabled = true;
+            }
+        }
+
+        function changePrize() {
+            let val = parseInt(document.getElementById('inp-prize').value);
+            if (val !== -1) {
+                currentPrizeIndex = val;
+                updatePrizeUI();
+            }
+        }
+
+        // Lịch chạy chuẩn theo thời gian (u = 0..1 => tỉ lệ quãng đường): 85% đầu đều tốc, 15% cuối nước rút nhanh hơn 30%
+        function plannedProgress(u) {
+            const v = 0.85 + 0.15 / 1.3;
+            const uSwitch = 0.85 / v;
+            return u <= uSwitch ? u * v : 0.85 + (u - uSwitch) * v * 1.3;
+        }
+
+        function generateHorseColor() {
+            const rand = Math.random();
+            if (rand < 0.25) {
+                const shade = 0.4 + Math.random() * 1.0;
+                return `grayscale(100%) brightness(${shade}) contrast(1.2)`;
+            } else {
+                const hue = Math.floor(Math.random() * 50) - 10;
+                const sat = 1.0 + Math.random() * 0.5;
+                const bri = 0.6 + Math.random() * 0.4;
+                return `hue-rotate(${hue}deg) saturate(${sat}) sepia(0.5) brightness(${bri})`;
+            }
+        }
+
+        function spawnObstacles(qty) {
+            bananas = []; logs = [];
+            let logCount = 5 + Math.floor(qty * 0.2);
+            for (let i = 0; i < logCount; i++) {
+                let lx = START_LINE + 1000 + Math.random() * (MAP_LENGTH - 2000);
+                let ly = TOP_MARGIN + 20 + Math.random() * (height - TOP_MARGIN - 40);
+                let logBody = BODIES.rectangle(lx, ly, 60, 20, { isStatic: true, angle: (Math.random() - 0.5), label: 'log' });
+                COMPOSITE.add(world, logBody);
+                logs.push(logBody);
+            }
+            let bananaCount = 8 + Math.floor(qty * 0.3);
+            for (let i = 0; i < bananaCount; i++) {
+                bananas.push({ x: START_LINE + 800 + Math.random() * (MAP_LENGTH - 1500), y: TOP_MARGIN + 20 + Math.random() * (height - TOP_MARGIN - 40), active: true });
+            }
+        }
+
+        function drawWinnerAvatar(duck) {
+            const wCanvas = document.getElementById('win-canvas');
+            const wCtx = wCanvas.getContext('2d');
+            wCtx.clearRect(0, 0, wCanvas.width, wCanvas.height);
+            wCtx.save(); wCtx.translate(wCanvas.width / 2, wCanvas.height / 2); wCtx.scale(4, 4);
+            if (duck.colorFilter) wCtx.filter = duck.colorFilter;
+            wCtx.drawImage(horseImgStatic, -30, -25, 60, 50);
+            wCtx.filter = 'none';
+            wCtx.fillStyle = "white"; wCtx.font = "bold 14px Arial"; wCtx.textAlign = "center";
+            wCtx.fillText(duck.id, 0, -10);
+            wCtx.restore();
+        }
+
+        // --- GAME LOOP ---
+        function loop() {
+            if (!isRacing && ducks.length === 0) {
+                ctx.fillStyle = isRainMode ? "#2e7d32" : "#388e3c";
+                ctx.fillRect(0, 0, width, height);
+
+                ctx.save();
+                drawBackground(0); // Draw background at initial position
+                drawTrackMarkings(0);
+                // Also draw track markings needs to be after background translated? 
+                // Wait, drawBackground handles global rects. 
+                // drawTrackMarkings handles lines.
+                // To be consistent with running state:
+                // background acts as bottom layer.
+                ctx.restore();
+
+                requestAnimationFrame(loop);
+                return;
+            }
+
+            ENGINE.update(engine, 1000 / 60);
+            globalTimer += 0.1;
+            if (flashOpacity > 0) flashOpacity -= 0.02;
+
+            let leaderX = 0;
+            if (ducks.length > 0) leaderX = Math.max(...ducks.map(d => d.body.position.x));
+
+            if (isRacing) {
+                // Dust
+                for (let i = dusts.length - 1; i >= 0; i--) {
+                    let d = dusts[i];
+                    d.x += d.vx; d.y += d.vy; d.life -= 0.04; d.size += 0.3;
+                    if (d.life <= 0) dusts.splice(i, 1);
+                }
+
+                // Update Horses
+                const progress = Math.max(0, Math.min(1, (leaderX - START_LINE) / (FINISH_LINE - START_LINE)));
+
+                // Canh giờ: ngựa đang giữ hạng TOP_N phải về đích đúng raceTime giây => cả đàn tăng/giảm tốc cùng lúc
+                raceFrames++;
+                const elapsed = (Date.now() - startTime) / 1000;
+                const ranked = [...finishers, ...ducks.filter(d => !d.finished).sort((a, b) => b.body.position.x - a.body.position.x)];
+                const pacer = ranked[winnersNeeded - 1];
+                if (pacer && !pacer.finished) {
+                    const plannedX = START_LINE + (FINISH_LINE - START_LINE) * plannedProgress(elapsed / raceTime);
+                    const frameScale = raceFrames > 30 ? Math.max(0.2, Math.min(1.5, (elapsed * 60) / raceFrames)) : 1; // 120Hz => 0.5
+                    const wanted = frameScale * Math.max(0.4, Math.min(2.5, 1 + (plannedX - pacer.body.position.x) * 0.002));
+                    paceMult += (wanted - paceMult) * 0.05;
+                }
+
+                ducks.forEach(d => {
+                    let dX = d.body.position.x;
+                    let dY = d.body.position.y;
+
+                    // Ngựa đã về đích: giảm tốc dần rồi dừng sau vạch đích
+                    if (d.finished) {
+                        BODY.setVelocity(d.body, { x: d.body.velocity.x * 0.96, y: 0 });
+                        d.gallopOffset = 0;
+                        BODY.setAngularVelocity(d.body, 0);
+                        BODY.setAngle(d.body, 0);
+                        return;
+                    }
+
+                    let strategyMult = 1.2;
+                    if (progress < 0.3) strategyMult = d.strategyData.boostStart;
+                    else if (progress > 0.8) strategyMult = d.strategyData.boostEnd;
+
+                    // EXTRA SPEED at the end (Last 15% of race)
+                    if (progress > 0.85) {
+                        strategyMult *= 1.3; // Speed up by 30% near finish
+                    }
+
+                    let variance = 1.5 + Math.random() * 0.1;
+                    if (d.strategy === 'WILD') variance = 1.3 + Math.random() * 0.5;
+
+                    if (d.status === 'NORMAL') {
+                        for (let b of bananas) {
+                            if (!b.active) continue;
+                            if (Math.hypot(dX - b.x, dY - b.y) < 30) {
+                                d.status = 'SLIPPING'; d.statusTimer = 40; b.active = false; playSound('slip');
+                                BODY.setVelocity(d.body, { x: d.body.velocity.x * 0.5, y: (Math.random() - 0.5) * 5 });
+                                break;
+                            }
+                        }
+                    }
+                    if (d.statusTimer > 0) { d.statusTimer--; if (d.statusTimer <= 0) d.status = 'NORMAL'; }
+
+                    if (d.status === 'NORMAL') {
+                        let targetSpeed = d.baseSpeed * strategyMult * variance;
+                        if (isRainMode) targetSpeed *= 1.5;
+
+                        // Bám đuổi: tụt quá CATCHUP_FREE so với ngựa dẫn đầu thì càng xa càng được tăng tốc
+                        let gapToLeader = Math.max(0, leaderX - dX - CATCHUP_FREE);
+                        targetSpeed *= 1 + Math.min(gapToLeader / CATCHUP_RANGE, 1) * CATCHUP_MAX;
+                        targetSpeed *= paceMult; // canh giờ kết thúc
+
+                        let currentVx = d.body.velocity.x;
+                        let newVx = currentVx + (targetSpeed - currentVx) * 0.05;
+
+                        let gallopPhase = Math.sin(globalTimer * 2 + d.dbId); // Use dbId or index for phase
+                        d.gallopOffset = gallopPhase * 4;
+
+                        if (gallopPhase > 0.8 && Math.random() < 0.5) {
+                            let dustColor = isRainMode ? "rgba(62, 39, 35," : "rgba(215, 204, 200,";
+                            dusts.push({ x: dX - 30, y: dY + 25, vx: -2 - Math.random() * 2, vy: -1 - Math.random(), size: 4 + Math.random() * 6, life: 1.0, color: dustColor });
+                        }
+
+                        // Chống kẹt: bị khúc gỗ chặn (gần như đứng yên) thì lách lên/xuống để vượt qua
+                        let newVy = (Math.random() - 0.5) * 0.5;
+                        d.stuckTimer = (currentVx < targetSpeed * 0.1) ? (d.stuckTimer || 0) + 1 : 0;
+                        if (d.stuckTimer > 15) {
+                            if (!d.dodgeDir) {
+                                const nearLog = logs.reduce((a, l) => (!a || Math.hypot(l.position.x - dX, l.position.y - dY) < Math.hypot(a.position.x - dX, a.position.y - dY)) ? l : a, null);
+                                d.dodgeDir = (nearLog && dY < nearLog.position.y) ? -1 : 1;
+                            }
+                            if (d.stuckTimer > 90) { d.dodgeDir *= -1; d.stuckTimer = 16; } // vẫn kẹt thì đổi hướng
+                            newVy = d.dodgeDir * 3;
+                        } else {
+                            d.dodgeDir = 0;
+                        }
+
+                        BODY.setVelocity(d.body, { x: newVx, y: newVy });
+                    } else if (d.status === 'SLIPPING') {
+                        d.gallopOffset = 0;
+                    }
+
+                    BODY.setAngularVelocity(d.body, 0);
+                    BODY.setAngle(d.body, 0);
+                });
+
+                updateTimerUI();
+            }
+
+            // Camera
+            if (ducks.length > 0) {
+                let targetCam = leaderX - width * 0.4;
+                targetCam = Math.max(0, Math.min(targetCam, FINISH_LINE - width + 500));
+                cameraX += (targetCam - cameraX) * 0.1;
+            }
+
+            updateHorseDOM();
+
+            // Draw
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = isRainMode ? "#2e7d32" : "#388e3c";
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.save();
+            // Draw Background (Fixed position vertically, parallax horizontally)
+            drawBackground(cameraX);
+
+            ctx.translate(-cameraX, 0);
+
+            drawTrackMarkings(cameraX);
+            drawDust();
+            drawLogs();
+            drawBananas();
+            drawHorseInfo();
+
+            if (isRainMode) { drawRain(cameraX); }
+            if (flashOpacity > 0) { ctx.fillStyle = `rgba(255, 255, 255, ${flashOpacity})`; ctx.fillRect(cameraX, 0, width, height); }
+
+            ctx.restore();
+
+            if (isRacing) updateRankUI();
+
+            // Check Finish: ghi nhận thứ tự về đích, đủ TOP_N ngựa thì kết thúc
+            if (isRacing && leaderX >= FINISH_LINE) {
+                let newFinishers = ducks
+                    .filter(d => !d.finished && d.body.position.x >= FINISH_LINE)
+                    .sort((a, b) => b.body.position.x - a.body.position.x);
+                newFinishers.forEach(d => { d.finished = true; finishers.push(d); });
+                if (finishers.length >= winnersNeeded) endGame(finishers.slice(0, winnersNeeded));
+            }
+            // Hết giờ (dự phòng): quá thời gian đã đặt 3 giây mà chưa đủ ngựa về đích thì lấy theo vị trí hiện tại
+            if (isRacing && (Date.now() - startTime) / 1000 > raceTime + 3) {
+                const ranked = [...finishers, ...ducks.filter(d => !d.finished).sort((a, b) => b.body.position.x - a.body.position.x)];
+                endGame(ranked.slice(0, winnersNeeded));
+            }
+            requestAnimationFrame(loop);
+        }
+
+        function updateHorseDOM() {
+            const worldLayer = document.getElementById('world-layer');
+            worldLayer.style.transform = `translateX(${-cameraX}px)`;
+            ducks.forEach(d => {
+                if (d.element) {
+                    let angle = (d.status === 'SLIPPING') ? 0.5 : 0;
+                    let visualY = d.body.position.y + d.gallopOffset;
+                    d.element.style.transform = `translate(${d.body.position.x}px, ${visualY}px) rotate(${angle}rad)`;
+                }
+            });
+        }
+
+        function drawTrackMarkings(camX) {
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+            ctx.lineWidth = 2;
+            if (ducks.length > 0) {
+                let laneH = (height - TOP_MARGIN - 100) / ducks.length;
+                for (let y = TOP_MARGIN; y < height; y += laneH * 2) {
+                    ctx.beginPath(); ctx.moveTo(camX, y); ctx.lineTo(camX + width, y); ctx.stroke();
+                }
+            }
+
+            ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+            ctx.font = "bold 40px Impact";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "bottom";
+
+            // Draw Start Line (Simple Checkered)
+            ctx.fillStyle = "#fff";
+            for (let y = TOP_MARGIN; y < height; y += 40) {
+                ctx.fillRect(START_LINE, y, 20, 20);
+                ctx.fillRect(START_LINE + 20, y + 20, 20, 20);
+            }
+
+            // Draw Finish Line (Redesigned)
+            const finishX = FINISH_LINE;
+            const finishWidth = 80;
+
+            // 1. Vertical Posts
+            ctx.fillStyle = "#5D4037";
+            ctx.fillRect(finishX, TOP_MARGIN - 40, 10, height); // Left Post
+            ctx.fillRect(finishX + finishWidth, TOP_MARGIN - 40, 10, height); // Right Post
+
+            // 2. Banner / Arch
+            ctx.fillStyle = "#D32F2F";
+            ctx.fillRect(finishX, TOP_MARGIN - 60, finishWidth + 10, 40);
+
+            ctx.fillStyle = "#FFD700";
+            ctx.font = "bold 20px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("FINISH", finishX + finishWidth / 2 + 5, TOP_MARGIN - 40);
+
+            // 3. Ground Checkered Pattern
+            for (let y = TOP_MARGIN; y < height; y += 40) {
+                // Column 1
+                ctx.fillStyle = (y % 80 === 0) ? "#fff" : "#000";
+                ctx.fillRect(finishX + 10, y, 40, 40);
+
+                // Column 2
+                ctx.fillStyle = (y % 80 === 0) ? "#000" : "#fff";
+                ctx.fillRect(finishX + 50, y, 40, 40);
+            }
+
+            for (let x = 0; x <= MAP_LENGTH; x += 1000) {
+                if (x < camX - 200 || x > camX + width + 200) continue;
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+                ctx.beginPath(); ctx.moveTo(x, TOP_MARGIN); ctx.lineTo(x, height); ctx.stroke();
+
+                ctx.save();
+                ctx.translate(x, TOP_MARGIN + 20);
+                ctx.fillStyle = "rgba(255,255,255,0.6)";
+                ctx.fillText((x / 10) + "m", 0, 0);
+                ctx.restore();
+            }
+        }
+
+        function drawDust() {
+            dusts.forEach(d => {
+                ctx.fillStyle = d.color + d.life + ")";
+                ctx.beginPath(); ctx.arc(d.x, d.y, d.size, 0, Math.PI * 2); ctx.fill();
+            });
+        }
+
+        function drawLogs() {
+            ctx.fillStyle = "#4e342e"; ctx.strokeStyle = "#3e2723"; ctx.lineWidth = 3;
+            logs.forEach(l => {
+                ctx.save(); ctx.translate(l.position.x, l.position.y); ctx.rotate(l.angle);
+                ctx.beginPath(); ctx.roundRect(-30, -10, 60, 20, 5); ctx.fill(); ctx.stroke();
+                ctx.restore();
+            });
+        }
+
+        function drawBananas() { ctx.font = "24px Arial"; ctx.textAlign = "center"; bananas.forEach(b => { if (b.active) ctx.fillText("🍌", b.x, b.y); }); }
+
+        function drawHorseInfo() {
+            ducks.forEach(d => {
+                let x = d.body.position.x;
+                let y = d.body.position.y + d.gallopOffset - 40;
+                ctx.save(); ctx.translate(x, y);
+                if (d.status === 'SLIPPING') { ctx.font = "20px Arial"; ctx.fillText("💫", 0, 0); }
+
+                ctx.fillStyle = "white"; ctx.font = "bold 14px Arial"; ctx.textAlign = "center";
+                ctx.shadowColor = "black"; ctx.shadowBlur = 4;
+                ctx.fillText(d.participant && d.participant.id ? d.participant.id : d.id, 0, 0); // Display ID on horse
+
+                ctx.fillStyle = STRATEGIES[d.strategy].color;
+                ctx.beginPath(); ctx.arc(0, -15, 4, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        function drawRain(camX) {
+            ctx.strokeStyle = "rgba(200, 230, 255, 0.3)"; ctx.lineWidth = 2; ctx.beginPath();
+            let startRainX = Math.floor(camX / 100) * 100;
+            for (let i = 0; i < 100; i++) {
+                let rx = startRainX + Math.random() * width; let ry = TOP_MARGIN + Math.random() * (height - TOP_MARGIN);
+                ctx.moveTo(rx, ry); ctx.lineTo(rx - 20, ry + 40);
+            }
+            ctx.stroke();
+        }
+
+        function drawBackground(camX) {
+            const H = TOP_MARGIN;
+
+            // 1. Base Green Background
+            ctx.fillStyle = "#4CAF50"; // Main Green
+            ctx.fillRect(0, 0, width, H);
+
+            // 2. Small lighter triangles (Distant trees/hills)
+            const smallTreeSpacing = 100;
+            const smallTreeW = 40;
+            const smallTreeH = 60;
+            const parallaxSmall = 0.3; // Move slower
+
+            let startSmall = -(camX * parallaxSmall) % smallTreeSpacing;
+            if (startSmall > 0) startSmall -= smallTreeSpacing;
+
+            ctx.fillStyle = "#81C784"; // Light Green
+            for (let x = startSmall; x < width; x += smallTreeSpacing) {
+                if (x < -smallTreeW) continue;
+                ctx.beginPath();
+                ctx.moveTo(x, H - 20); // Base Y slightly up
+                ctx.lineTo(x + smallTreeW / 2, H - 20 - smallTreeH);
+                ctx.lineTo(x + smallTreeW, H - 20);
+                ctx.fill();
+            }
+
+            // 2.5 Ground Strip (Cushion)
+            ctx.fillStyle = "#388E3C"; // Darker Green
+            ctx.fillRect(0, H - 25, width, 25);
+
+            // Lighter edge for definition
+            ctx.fillStyle = "#66BB6A";
+            ctx.fillRect(0, H - 25, width, 5);
+
+            // 3. Big Pine Trees
+            const bigTreeSpacing = 250;
+            const parallaxBig = 0.5;
+
+            let startBig = -(camX * parallaxBig) % bigTreeSpacing;
+            if (startBig > 0) startBig -= bigTreeSpacing;
+
+            for (let x = startBig; x < width; x += bigTreeSpacing) {
+                if (x < -100) continue;
+                drawVectorTree(x + 30, H - 5); // Draw sitting on the strip
+            }
+
+            // 4. Blue Water Strip at Bottom - REMOVED
+            // ctx.fillStyle = "#4FC3F7"; 
+            // ctx.fillRect(0, H - 20, width, 20);
+        }
+
+        function drawVectorTree(x, bottomY) {
+            // Scaled down by ~0.6x to fit 120px height
+            const trunkW = 12;
+            const trunkH = 24;
+
+            // Shadow base
+            ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+            ctx.beginPath();
+            ctx.ellipse(x, bottomY, 16, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Trunk (Extended slightly down to look planted)
+            ctx.fillStyle = "#795548"; // Brown
+            ctx.fillRect(x - trunkW / 2, bottomY - trunkH, trunkW, trunkH + 5);
+
+            // Foliage (3 Triangles)
+            ctx.fillStyle = "#2E7D32"; // Dark Green
+
+            // Bottom Tier
+            const t1W = 48; const t1H = 36;
+            let t1Y = bottomY - 18;
+            ctx.beginPath();
+            ctx.moveTo(x - t1W / 2, t1Y);
+            ctx.lineTo(x, t1Y - t1H);
+            ctx.lineTo(x + t1W / 2, t1Y);
+            ctx.fill();
+
+            // Middle Tier
+            const t2W = 36; const t2H = 30;
+            let t2Y = t1Y - 18;
+            ctx.beginPath();
+            ctx.moveTo(x - t2W / 2, t2Y);
+            ctx.lineTo(x, t2Y - t2H);
+            ctx.lineTo(x + t2W / 2, t2Y);
+            ctx.fill();
+
+            // Top Tier
+            const t3W = 24; const t3H = 24;
+            let t3Y = t2Y - 18;
+            ctx.beginPath();
+            ctx.moveTo(x - t3W / 2, t3Y);
+            ctx.lineTo(x, t3Y - t3H);
+            ctx.lineTo(x + t3W / 2, t3Y);
+            ctx.fill();
+        }
+
+        function startGame() {
+            if (isRacing) return;
+            playSound('whistle');
+
+            // Auto-hide Controls Panel
+            document.querySelector('.controls-panel').style.display = 'none';
+
+            // Resize Canvas for Full Screen
+            width = gameStage.offsetWidth;
+            height = gameStage.offsetHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            COMPOSITE.clear(world); ENGINE.clear(engine);
+            ducks = []; logs = []; bananas = []; dusts = []; finishers = [];
+            document.getElementById('world-layer').innerHTML = '';
+
+            isRainMode = Math.random() < 0.3;
+            const alertBox = document.getElementById('scenario-alert');
+            if (isRainMode) {
+                alertBox.innerHTML = `⛈️ MƯA LỚN<span>Đường trơn trượt!</span>`;
+            } else {
+                alertBox.innerHTML = `☀️ ĐẸP TRỜI<span>Điều kiện lý tưởng!</span>`;
+            }
+            alertBox.style.transform = "translate(-50%, -50%) scale(1)";
+            setTimeout(() => { alertBox.style.transform = "translate(-50%, -50%) scale(0)"; }, 2000);
+
+            let qty = parseInt(document.getElementById('inp-qty').value);
+            let time = Math.max(10, Math.min(300, parseInt(document.getElementById('inp-time').value) || 30)); // Thời gian kết thúc (giây) đặt ở bảng điều khiển
+            raceTime = time; paceMult = 1; raceFrames = 0;
+            try { localStorage.setItem('horse_v3_time', time); } catch (e) { }
+            // Calculate avg speed based on time
+            let avgSpeed = (FINISH_LINE - START_LINE) / (time * 60);
+            let availableHeight = height - TOP_MARGIN - 100;
+            let laneHeight = availableHeight / qty;
+
+            // Load Participants
+            const storedParticipants = localStorage.getItem('lucky_draw_participants');
+            let participants = [];
+            if (storedParticipants) {
+                try {
+                    participants = JSON.parse(storedParticipants);
+                    if (!Array.isArray(participants)) participants = [];
+
+                    // --- FILTER OUT WINNERS ---
+                    const storedWinners = JSON.parse(localStorage.getItem('lucky_draw_winners') || '[]');
+                    const winnerIds = new Set(storedWinners.map(w => w.id ? String(w.id).trim() : null).filter(x => x));
+
+                    participants = participants.filter(p => {
+                        const pid = p.id ? String(p.id).trim() : null;
+                        const pname = p.name ? String(p.name).trim() : null;
+
+                        // Check logic: if ID exists, check ID. If not, check Name as fallback.
+                        if (pid && winnerIds.has(pid)) return false;
+
+                        // Also check against names if needed (Horse V3 stores names too, but IDs are safer)
+                        // If no ID is present in winner list, we might rely on name, but let's stick to ID primarily 
+                        // as V3 always tries to save ID.
+
+                        return true;
+                    });
+                    // --------------------------
+
+                    // Shuffle
+                    for (let i = participants.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [participants[i], participants[j]] = [participants[j], participants[i]];
+                    }
+                } catch (e) { console.error(e); }
+            }
+
+            const stratKeys = Object.keys(STRATEGIES);
+
+            for (let i = 0; i < qty; i++) {
+                let x = START_LINE - 40;
+                let y = TOP_MARGIN + 50 + (i * laneHeight);
+                let p = participants[i] || {};
+                // Display ID priority: ID -> Name -> Index
+                let displayId = p.id ? p.id : (p.name ? p.name : (i + 1));
+
+                let body = BODIES.circle(x, y, 20, { frictionAir: 0.05, restitution: 0, collisionFilter: { group: -1 } });
+
+                const img = document.createElement('img');
+                img.src = 'horse.gif';
+                img.className = 'horse-runner';
+                const randomFilter = generateHorseColor();
+                img.style.filter = randomFilter;
+                document.getElementById('world-layer').appendChild(img);
+
+                let stratKey = stratKeys[Math.floor(Math.random() * stratKeys.length)];
+
+                ducks.push({
+                    id: displayId,
+                    dbId: i,
+                    body: body,
+                    element: img,
+                    colorFilter: randomFilter,
+                    baseSpeed: avgSpeed * (0.85 + Math.random() * 0.30),
+                    strategy: stratKey,
+                    strategyData: STRATEGIES[stratKey],
+                    gallopOffset: 0,
+                    status: 'NORMAL', statusTimer: 0,
+                    finished: false,
+                    participant: p
+                });
+                COMPOSITE.add(world, body);
+            }
+
+            // Luôn lấy TOP_N ngựa về đích đầu tiên (không vượt quá số ngựa), cả TOP_N cùng nhận giải đang chọn
+            winnersNeeded = Math.min(TOP_N, ducks.length);
+
+            spawnObstacles(qty);
+
+            let wallTop = BODIES.rectangle(MAP_LENGTH / 2, TOP_MARGIN - 50, MAP_LENGTH + 2000, 100, { isStatic: true });
+            let wallBot = BODIES.rectangle(MAP_LENGTH / 2, height + 50, MAP_LENGTH + 2000, 100, { isStatic: true });
+            COMPOSITE.add(world, [wallTop, wallBot]);
+
+            isRacing = true;
+            document.getElementById('winner-screen').style.display = 'none';
+            startTime = Date.now();
+            // requestAnimationFrame(loop); // REMOVED: Loop is already running globally
+        }
+
+        function resetGame() {
+            // Force reload to refresh participant list and ensure winners are removed
+            location.reload();
+        }
+
+        function endGame(topList) {
+            isRacing = false;
+            const winner = topList[0];
+            playSound('win');
+            playSound('fireworks_start'); // Trigger fireworks sound
+            document.getElementById('winner-screen').style.display = 'flex';
+            confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: ['#ffd700', '#ffffff', '#388e3c'] });
+            drawWinnerAvatar(winner);
+
+            // Deduct Prize
+            // Deduct Prize
+            let prizeName = "VÔ ĐỊCH";
+            let prizeItem = "";
+            if (currentPrizeIndex !== -1) {
+                const p = prizes[currentPrizeIndex];
+                prizeName = p.name;
+                prizeItem = p.item;
+                // prizes[currentPrizeIndex].quantity--;
+                // localStorage.setItem('lucky_draw_prizes', JSON.stringify(prizes));
+                updatePrizeUI();
+            }
+
+            // UI Update
+            document.querySelector('.win-title').style.display = 'none'; // Hide generic title
+
+            // 1. Title: Top N về đích
+            document.getElementById('win-name').innerText = `TOP ${topList.length} VỀ ĐÍCH`;
+
+            // 2. ID (Hidden per request)
+            // const idEl = document.getElementById('win-id');
+            // idEl.innerText = wID;
+            // idEl.style.display = "block";
+            document.getElementById('win-id').style.display = 'none';
+
+            // 3. Prize (cả Top N cùng nhận giải này)
+            document.getElementById('win-prize').innerText = "" + prizeName;
+
+            // 3b. Danh sách Top N theo thứ tự về đích (cột trái 1-5, cột phải 6-10)
+            const listEl = document.getElementById('win-list');
+            listEl.style.gridTemplateRows = `repeat(${Math.ceil(topList.length / 2)}, auto)`;
+            listEl.innerHTML = '';
+            topList.forEach((d, i) => {
+                const item = document.createElement('div');
+                item.className = 'wl-item' + (i < 3 ? ' wl-top' + (i + 1) : '');
+                const rankEl = document.createElement('span');
+                rankEl.className = 'wl-rank';
+                rankEl.innerText = i + 1;
+                const nameEl = document.createElement('span');
+                nameEl.className = 'wl-name';
+                nameEl.innerText = d.participant.name || ("Ngựa " + d.id);
+                item.append(rankEl, nameEl);
+                listEl.appendChild(item);
+            });
+
+            // 4. Prize Image
+            const prizeImg = document.getElementById('win-prize-img');
+            if (currentPrizeIndex !== -1 && prizes[currentPrizeIndex] && prizes[currentPrizeIndex].image) {
+                prizeImg.src = prizes[currentPrizeIndex].image;
+                prizeImg.style.display = 'block';
+            } else {
+                prizeImg.style.display = 'none';
+            }
+
+            // Save Winners (cả Top N)
+            // Lưu ngược từ hạng N -> 1 vì trang Lịch sử hiển thị mới nhất trước => hạng 1 nằm trên cùng
+            let winners = JSON.parse(localStorage.getItem('lucky_draw_winners') || '[]');
+            const savedAt = Date.now();
+            for (let i = topList.length - 1; i >= 0; i--) {
+                const w = topList[i];
+                winners.push({
+                    name: w.participant.name || ("Ngựa " + w.id),
+                    id: w.participant.id || "",
+                    prize: prizeName,
+                    prizeItem: prizeItem,
+                    rank: i + 1,
+                    timestamp: savedAt,
+                    gameType: "Đua Ngựa V3"
+                });
+            }
+            localStorage.setItem('lucky_draw_winners', JSON.stringify(winners));
+
+            // --- REMOVE WINNER FROM PARTICIPANTS LIST ---
+            try {
+                let currentParticipants = JSON.parse(localStorage.getItem('lucky_draw_participants') || '[]');
+                let initialCount = currentParticipants.length;
+                topList.forEach(w => {
+                    // Ensure we get a valid ID (Horse V3 stores p.id in winner.participant.id usually)
+                    let wID = String(w.participant.id || w.id).trim();
+                    let wName = String(w.participant.name || w.name || "").trim();
+
+                    currentParticipants = currentParticipants.filter(p => {
+                        let pId = String(p.id || p.msnv || p.code || p.employeeCode || p.name || "").trim();
+                        let pName = String(p.name || "").trim();
+
+                        // 1. Match by ID
+                        if (wID && pId && wID === pId) return false;
+
+                        // 2. Fallback to Name
+                        if ((!wID || !pId) && wName && pName === wName) return false;
+
+                        return true;
+                    });
+                });
+
+                if (currentParticipants.length !== initialCount) {
+                    localStorage.setItem('lucky_draw_participants', JSON.stringify(currentParticipants));
+                    console.log("Removed winners from list:", initialCount - currentParticipants.length);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function updateTimerUI() {
+            let diff = Date.now() - startTime;
+            let ms = Math.floor((diff % 1000) / 100);
+            let s = Math.floor((diff / 1000) % 60);
+            let m = Math.floor(diff / 60000);
+            document.getElementById('timer').innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s) + "." + ms;
+        }
+
+        function updateRankUI() {
+            if (globalTimer % 10 < 1) {
+                // Ngựa đã về đích xếp trước (theo thứ tự về đích), còn lại xếp theo vị trí
+                let sorted = [...finishers, ...ducks.filter(d => !d.finished).sort((a, b) => b.body.position.x - a.body.position.x)];
+                let html = "";
+                for (let i = 0; i < Math.min(TOP_N, sorted.length); i++) {
+                    let d = sorted[i];
+                    let stratName = STRATEGIES[d.strategy].name;
+                    let stratColor = STRATEGIES[d.strategy].color;
+                    html += `<div class="r-item">
+                        <span class="${i === 0 ? 'r-1' : ''}">${d.finished ? '🏁 ' : ''}${i + 1}. ${(d.participant && d.participant.id ? d.participant.id : d.id)} - ${d.participant && d.participant.name ? d.participant.name : ""}</span>
+                        <span class="strat-tag" style="background:${stratColor}">${stratName}</span>
+                    </div>`;
+                }
+                document.getElementById('rank-list').innerHTML = html;
+            }
+        }
+
+        // Initial Draw
+        loop();
+    </script>
+</body>
+
+</html>

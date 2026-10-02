@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Duck Race: Tet Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Anton&display=swap"
+        rel="stylesheet">
+    <style>
+        /* --- GLOBAL & BACKGROUND --- */
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Roboto Condensed', sans-serif;
+            user-select: none;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #b71c1c;
+            /* Fallback */
+        }
+
+        .bg-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://stg.1creators.com/static/images/lp/hero-banner-bg-mobile.webp');
+            /* Tet Theme Background */
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            filter: brightness(0.8);
+        }
+
+        /* --- MAIN CONTAINER --- */
+        .main-game-container {
+            width: 90%;
+            max-width: 1400px;
+            height: 85vh;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- LEFT COLUMN: CONTROLS --- */
+        .controls-panel {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .panel-title {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.5rem;
+            color: #FFD700;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .control-group {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #ddd;
+        }
+
+        input[type="number"] {
+            width: 70px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background: rgba(0, 0, 0, 0.5);
+            color: #FFD700;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Anton', sans-serif;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-start {
+            background: linear-gradient(45deg, #FFD700, #FFA000);
+            color: #b71c1c;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-start:active {
+            transform: translateY(0);
+        }
+
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ddd;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-reset:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-back {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #aaa;
+            font-size: 0.9rem;
+            padding: 8px;
+        }
+
+        /* Timer & Prize Info */
+        #timer {
+            font-family: 'Courier New', monospace;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #FFD700;
+            margin-bottom: 10px;
+        }
+
+        #prize-info {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        #prize-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 5px;
+        }
+
+        #prize-count {
+            font-size: 0.9rem;
+            color: #aaa;
+            font-style: italic;
+        }
+
+        /* --- RIGHT COLUMN: SLOT (GAME) --- */
+        .slot-panel {
+            flex-grow: 1;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* --- OVERLAYS (Alerts, Winner) --- */
+        #scenario-alert {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            background: rgba(183, 28, 28, 0.95);
+            color: #FFD700;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-family: 'Anton', sans-serif;
+            font-size: 1.5rem;
+            border: 2px solid #FFD700;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 150;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        #rank-board {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 150px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            pointer-events: none;
+        }
+
+        .r-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+
+        .r-1 {
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        #winner-screen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .win-box {
+            background: linear-gradient(135deg, #fff, #f0f0f0);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 4px solid #FFD700;
+            box-shadow: 0 0 60px rgba(255, 215, 0, 0.4);
+            animation: popUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .win-title {
+            font-family: 'Anton', sans-serif;
+            font-size: 2rem;
+            color: #b71c1c;
+            margin: 0;
+        }
+
+        .win-name {
+            font-family: 'Anton', sans-serif;
+            font-size: 3rem;
+            color: #FFD700;
+            text-shadow: 2px 2px 0 #b71c1c;
+            margin: 10px 0;
+        }
+
+        @keyframes popUp {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-image"></div>
+
+    <div class="main-game-container">
+
+        <!-- LEFT: CONTROLS -->
+        <div class="controls-panel">
+            <div class="panel-title">ĐUA VỊT TẾT</div>
+
+            <a href="../index.html" style="text-decoration: none;">
+                <button class="btn btn-back">⬅ QUAY VỀ MENU</button>
+            </a>
+
+            <div class="control-group">
+                <div id="prize-info">
+                    <div id="prize-name">ĐANG TẢI...</div>
+                    <div id="prize-count">---</div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="input-row">
+                    <label>SỐ VỊT</label>
+                    <input type="number" id="inp-qty" value="30" min="2" max="200">
+                </div>
+                <div class="input-row">
+                    <label>THỜI GIAN (s)</label>
+                    <input type="number" id="inp-time" value="30" min="10" max="600">
+                </div>
+            </div>
+
+            <div id="timer">00:00.0</div>
+
+            <button id="btn-start" class="btn btn-start" onclick="startGame()">BẮT ĐẦU</button>
+            <button id="btn-reset" class="btn btn-reset" onclick="resetGame()">LÀM MỚI</button>
+        </div>
+
+        <!-- RIGHT: GAME SLOT -->
+        <div class="slot-panel" id="slotPanel">
+            <canvas id="gameCanvas"></canvas>
+
+            <div id="scenario-alert">MODE NAME<span>Description</span></div>
+
+            <div id="rank-board">
+                <div style="text-align:center; color:#aaa; margin-bottom:5px;">TOP 5</div>
+                <div id="rank-list">---</div>
+            </div>
+
+            <div id="winner-screen">
+                <div class="win-box">
+                    <div style="font-size: 40px;">👑</div>
+                    <h2 class="win-title">NHÀ VÔ ĐỊCH</h2>
+                    <canvas id="win-canvas" width="300" height="200"
+                        style="width:100%; height:auto; margin:10px 0;"></canvas>
+                    <h1 id="win-name" class="win-name">#1</h1>
+                    <button class="btn btn-start" onclick="resetGame()">CHƠI LẠI</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- AUDIO REMOVED ---
+        function playSound(type) {
+            // Audio removed as per user request
+        }
+
+        // --- CONSTANTS ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const slotPanel = document.getElementById('slotPanel');
+
+        // Initial Sizing
+        let width = slotPanel.offsetWidth;
+        let height = slotPanel.offsetHeight;
+        canvas.width = width;
+        canvas.height = height;
+
+        // Resize Listener
+        window.addEventListener('resize', () => {
+            width = slotPanel.offsetWidth;
+            height = slotPanel.offsetHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            // Re-cache environment if needed
+            envCanvas.width = width;
+            envCanvas.height = height;
+            envCached = false;
+        });
+
+        const MAP_LENGTH = 8000;
+        const TOP_MARGIN = 50; // Reduced margin since we are inside a panel
+        const START_LINE = 100;
+        const FINISH_LINE = MAP_LENGTH - 400;
+        const TRACK_LENGTH = FINISH_LINE - START_LINE;
+
+        // --- CACHING ---
+        let envCanvas = document.createElement('canvas');
+        let envCtx = envCanvas.getContext('2d');
+        let envCached = false;
+
+        // --- GAME VARIABLES ---
+        let ducks = [];
+        let rocks = []; let bananas = []; let whirlpools = []; let jellyfish = []; let logs = []; let waves = []; let lightnings = []; let windLines = [];
+        let isRacing = false;
+
+        // ✅ ADD: time-based progress variables
+        let raceStartTime = 0;
+        let raceDuration = 0;
+        let winnerId = -1;
+
+        // PRIZE SYSTEM
+        let prizes = [];
+        let currentPrizeIndex = -1;
+
+        let cameraX = 0;
+        let waterOffset = 0;
+        let globalTimer = 0;
+        let flashOpacity = 0;
+        let windForce = 0;
+
+        // --- LOAD PRIZE ---
+        window.addEventListener('DOMContentLoaded', () => {
+            loadCurrentPrize();
+        });
+
+        function loadCurrentPrize() {
+            const storedPrizes = localStorage.getItem('lucky_draw_prizes');
+            if (storedPrizes) {
+                prizes = JSON.parse(storedPrizes);
+                currentPrizeIndex = prizes.findIndex(p => p.quantity > 0);
+                updatePrizeUI();
+            }
+        }
+
+        function updatePrizeUI() {
+            const nameEl = document.getElementById('prize-name');
+            const countEl = document.getElementById('prize-count');
+            const startBtn = document.getElementById('btn-start');
+
+            if (currentPrizeIndex !== -1) {
+                const p = prizes[currentPrizeIndex];
+                nameEl.innerText = p.name;
+                countEl.innerText = `Còn lại: ${p.quantity}`;
+                startBtn.style.opacity = "1";
+                startBtn.style.pointerEvents = "auto";
+            } else {
+                nameEl.innerText = "HẾT QUÀ";
+                countEl.innerText = "Vui lòng nạp thêm";
+                startBtn.style.opacity = "0.5";
+                startBtn.style.pointerEvents = "none";
+            }
+        }
+
+        const HATS = ['#e53935', '#8e24aa', '#1e88e5', '#43a047', '#333', '#fbc02d', null, null, null];
+
+        // --- HELPER FUNCTIONS ---
+        function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+        function clamp(val, min, max) { return Math.min(Math.max(val, min), max); }
+
+        function getRandomY() {
+            // Adjusted for new height logic
+            let seed = Math.random();
+            if (seed < 0.3) return TOP_MARGIN + 10 + Math.random() * 50;
+            else if (seed > 0.7) return height - 10 - Math.random() * 50;
+            else return TOP_MARGIN + 60 + Math.random() * (height - TOP_MARGIN - 120);
+        }
+
+        // --- RACE LOGIC (PURE SIMULATION) ---
+        // --- RACE LOGIC (DETERMINISTIC) ---
+        class RaceLogic {
+            constructor(duration, distance, ducks) {
+                this.duration = duration; // seconds
+                this.distance = distance; // pixels
+                this.ducks = ducks;
+                this.startTime = 0;
+                this.lastTime = 0;
+            }
+
+            start() {
+                this.startTime = performance.now() / 1000; // seconds
+                this.lastTime = this.startTime;
+            }
+
+            update(currentTime) {
+                // currentTime is in seconds
+                let dt = currentTime - this.lastTime;
+                this.lastTime = currentTime;
+
+                let elapsed = currentTime - this.startTime;
+                let t = elapsed / this.duration;
+
+                // Clamp t to [0, 1] for position calculation, but allow it to go slightly over for finish check
+                let clampedT = Math.min(Math.max(t, 0), 1);
+
+                // 1. Linear Progress (The Anchor)
+                let baseX = clampedT * this.distance;
+                let raceSpeed = this.distance / this.duration; // pixels per second
+
+                this.ducks.forEach(duck => {
+                    // Initialize penaltyX if not exists
+                    if (typeof duck.penaltyX === 'undefined') duck.penaltyX = 0;
+
+                    // --- COLLISION CHECK ---
+                    if (duck.status === 'NORMAL') {
+                        // Check Logs
+                        /*
+                        for (let log of logs) {
+                            let dx = Math.abs(duck.x - log.x);
+                            let dy = Math.abs(duck.y - log.y);
+                            if (dx < 35 && dy < 75) {
+                                duck.status = 'HIT_LOG';
+                                duck.stunTimer = 1.0; // 1 second stun
+                                duck.lastLogY = log.y;
+                                duck.visualAngle = -0.3;
+                                playSound('hit');
+                            }
+                        }
+                        // Check Bananas
+                        for (let b of bananas) {
+                            if (b.active && Math.hypot(duck.x - b.x, duck.y - b.y) < 25) {
+                                duck.status = 'SLIPPING';
+                                duck.stunTimer = 0.6;
+                                duck.visualAngle = 0.5;
+                                playSound('slip');
+                                b.active = false;
+                                break;
+                            }
+                        }
+                        // Check Jellyfish
+                        for (let j of jellyfish) {
+                            if (j.active && Math.hypot(duck.x - j.x, duck.y - j.y) < 30) {
+                                duck.status = 'SHOCKED';
+                                duck.stunTimer = 1.5;
+                                duck.visualAngle = 0;
+                                playSound('zap');
+                                j.active = false;
+                                break;
+                            }
+                        }
+                        // Check Whirlpools
+                        for (let w of whirlpools) {
+                            if (Math.hypot(duck.x - w.x, duck.y - w.y) < w.radius - 10) {
+                                duck.status = 'SPINNING';
+                                duck.stunTimer = 1.0;
+                                duck.visualAngle = 1.2;
+                                playSound('splash');
+                                break;
+                            }
+                        }
+                        */
+                    }
+
+                    // --- PENALTY & STATUS LOGIC ---
+                    if (duck.status !== 'NORMAL') {
+                        duck.stunTimer -= dt;
+
+                        // While stunned, fall back relative to the race
+                        // We apply a negative penalty that grows
+                        duck.penaltyX -= raceSpeed * dt * 0.9;
+
+                        // Visual rotation updates
+                        if (duck.status === 'SLIPPING') duck.visualAngle += 15 * dt;
+                        else if (duck.status === 'SPINNING') duck.visualAngle += 20 * dt;
+
+                        if (duck.stunTimer <= 0) {
+                            duck.status = 'NORMAL';
+                            duck.visualAngle = 0;
+                            // Escape maneuver for logs
+                            if (duck.lastLogY) {
+                                let escapeDir = (duck.y > duck.lastLogY) ? 1 : -1;
+                                duck.separationOffsetY = (duck.separationOffsetY || 0) + escapeDir * 50;
+                                duck.lastLogY = null;
+                            }
+                        }
+                    } else {
+                        // Recovery: Rubber band back to position
+                        // Winner recovers faster to ensure they win
+                        let recoveryRate = raceSpeed * dt * 0.5; // Base recovery
+                        if (duck.rank === 1) recoveryRate *= 4.0; // Winner super recovery
+                        else if (duck.rank <= 5) recoveryRate *= 2.0; // Top 5 recover well
+
+                        if (duck.penaltyX < 0) {
+                            duck.penaltyX += recoveryRate;
+                            if (duck.penaltyX > 0) duck.penaltyX = 0;
+                        }
+
+                        // Decay visual angle
+                        duck.visualAngle *= 0.9;
+                    }
+
+                    // 2. X-Axis Noise (Speed Variation)
+                    let frequency = 0.5 + (duck.randomSeed % 10) / 10;
+                    let amplitude = this.distance * (0.005 + (duck.randomSeed % 10) / 1000);
+
+                    let staminaFreq = 0.1 + (duck.randomSeed % 5) / 20;
+                    let staminaAmp = this.distance * 0.02;
+
+                    let noiseX = Math.sin(elapsed * frequency + duck.randomSeed) * amplitude;
+                    let staminaX = Math.sin(elapsed * staminaFreq) * staminaAmp;
+
+                    let totalNoise = noiseX + staminaX;
+
+                    totalNoise *= (1 - Math.pow(clampedT, 2));
+
+                    let biasX = 0;
+                    let rankFactor = (this.ducks.length - duck.rank) / this.ducks.length;
+
+                    if (duck.rank === 1) {
+                        biasX = (this.distance * 0.03) * (clampedT * clampedT);
+                    } else if (duck.rank === this.ducks.length) {
+                        biasX = -(this.distance * 0.03) * (clampedT * clampedT);
+                    } else {
+                        biasX = (this.distance * 0.015) * (rankFactor - 0.5) * (clampedT * clampedT);
+                    }
+
+                    let finalX = baseX + totalNoise + biasX + duck.penaltyX;
+
+                    if (clampedT >= 1) {
+                        finalX = Math.min(finalX, this.distance);
+                    }
+
+                    finalX = Math.max(0, finalX);
+
+                    let bobSpeed = 2 + (duck.randomSeed % 3);
+                    let bobHeight = 3;
+                    let bobY = Math.sin(elapsed * bobSpeed) * bobHeight;
+
+                    if (duck.separationOffsetY) {
+                        bobY += duck.separationOffsetY;
+                        duck.separationOffsetY *= 0.95;
+                    }
+
+                    duck.x = START_LINE + finalX;
+                    duck.y = duck.initY + bobY;
+                });
+
+                return t >= 1;
+            }
+        }
+
+        let raceLogic = null;
+
+
+        function spawnStaticObstacles() {
+            bananas = []; whirlpools = []; jellyfish = []; logs = [];
+            let qty = ducks.length;
+            let mapType = Math.random() < 0.5 ? 'TUNNEL' : 'BRIDGE';
+
+            /*
+            let logCount = 5 + Math.floor(qty * 0.05);
+            logCount = Math.min(logCount, 15);
+
+            for (let i = 0; i < logCount; i++) {
+                let lx = START_LINE + 600 + Math.random() * (MAP_LENGTH - 1000);
+                let ly;
+                if (mapType === 'TUNNEL') { if (Math.random() < 0.7) ly = (i % 2 === 0) ? TOP_MARGIN + 40 : height - 40; else ly = getRandomY(); }
+                else { if (Math.random() < 0.7) ly = (TOP_MARGIN + height) / 2 + (Math.random() - 0.5) * 100; else ly = getRandomY(); }
+
+                logs.push({
+                    x: lx,
+                    y: ly,
+                    width: 40,
+                    height: 140,
+                    angle: (Math.random() - 0.5) * 0.5
+                });
+            }
+            */
+
+            let bananaCount = 8 + Math.floor(qty * 0.1);
+            bananaCount = Math.min(bananaCount, 25);
+
+            for (let i = 0; i < bananaCount; i++) bananas.push({ x: START_LINE + 300 + Math.random() * (MAP_LENGTH - 800), y: getRandomY(), active: true });
+        }
+
+        // --- CORE LOOP ---
+        function loop() {
+            if (!isRacing && ducks.length === 0) {
+                ctx.fillStyle = "#4fc3f7"; ctx.fillRect(0, 0, width, height);
+                drawEnvironment(0);
+                requestAnimationFrame(loop);
+                return;
+            }
+
+            globalTimer += 0.05;
+            if (flashOpacity > 0) flashOpacity -= 0.02;
+
+            if (isRacing && raceLogic) {
+                let now = performance.now() / 1000;
+                let isFinished = raceLogic.update(now);
+
+                updateCamera();
+
+                // Update UI
+                let elapsedMS = (now - raceLogic.startTime) * 1000;
+                updateTimerUI(elapsedMS);
+                updateRankUI();
+
+                if (isFinished) finishGame();
+            }
+
+            ctx.clearRect(0, 0, width, height);
+            drawWater(cameraX);
+            ctx.save(); ctx.translate(-cameraX, 0);
+            drawEnvironment(cameraX);
+            drawLogs(); drawBananas(); drawRocks(); drawDucks();
+            if (flashOpacity > 0) { ctx.fillStyle = `rgba(255, 255, 255, ${flashOpacity})`; ctx.fillRect(cameraX, 0, width, height); }
+            ctx.restore();
+
+            requestAnimationFrame(loop);
+        }
+
+        function updateCamera() {
+            // 1. Find Leader (Tìm vị trí con vịt dẫn đầu)
+            let maxX = 0;
+            if (ducks.length > 0) {
+                maxX = Math.max(...ducks.map(d => d.x));
+            }
+
+            // 2. Calculate Target (Tính vị trí mục tiêu)
+            // Leader at 80% of screen width (Far Right Focus)
+            let targetCam = maxX - (width * 0.8);
+
+            // 3. Clamp (Giới hạn)
+            // 0 <= cameraX <= FINISH_LINE - width
+            targetCam = Math.max(0, Math.min(targetCam, FINISH_LINE - width));
+
+            // 4. Smooth Movement (Lerp)
+            // Formula: cameraX += (targetCameraX - cameraX) * 0.1
+            cameraX += (targetCam - cameraX) * 0.1;
+        }
+
+        function startGame() {
+            loadCurrentPrize();
+            if (currentPrizeIndex === -1) { alert("Đã hết giải thưởng!"); return; }
+            if (prizes[currentPrizeIndex].quantity <= 0) { alert("Giải này đã hết!"); updatePrizeUI(); return; }
+
+            if (isRacing) return;
+            playSound('whistle');
+
+            ducks = []; rocks = [];
+
+            const alertBox = document.getElementById('scenario-alert');
+            alertBox.innerHTML = `SUNNY RACE<span>Watch out for Logs & Bananas!</span>`;
+            alertBox.style.transform = "translateX(-50%) scale(1)";
+            setTimeout(() => { alertBox.style.transform = "translateX(-50%) scale(0)"; }, 3000);
+
+            let qty = parseInt(document.getElementById('inp-qty').value);
+
+            let timeSec = parseInt(document.getElementById('inp-time').value) || 30;
+            raceDuration = timeSec;
+
+            winnerId = Math.floor(Math.random() * qty) + 1;
+
+            let availableHeight = height - TOP_MARGIN - 50; // Adjusted for panel
+            let laneHeight = availableHeight / qty;
+
+            let ranks = Array.from({ length: qty }, (_, i) => i + 1);
+            for (let i = ranks.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [ranks[i], ranks[j]] = [ranks[j], ranks[i]];
+            }
+
+            let rank1Idx = ranks.indexOf(1);
+            let winnerIdx = winnerId - 1;
+            if (rank1Idx !== -1) {
+                ranks[rank1Idx] = ranks[winnerIdx];
+                ranks[winnerIdx] = 1;
+            }
+
+            for (let i = 0; i < qty; i++) {
+                let x = START_LINE;
+                let y = TOP_MARGIN + 20 + (i * laneHeight);
+
+                ducks.push({
+                    id: i + 1,
+                    initY: y,
+                    rank: ranks[i],
+                    randomSeed: Math.floor(Math.random() * 10000),
+                    hat: HATS[Math.floor(Math.random() * HATS.length)],
+                    status: 'NORMAL',
+                    statusTimer: 0,
+                    visualAngle: 0,
+                    x: x,
+                    y: y,
+                    penaltyX: 0
+                });
+            }
+            raceLogic = new RaceLogic(raceDuration, TRACK_LENGTH, ducks);
+            raceLogic.start();
+
+            spawnStaticObstacles();
+            isRacing = true; document.getElementById('winner-screen').style.display = 'none';
+        }
+
+        function finishGame() {
+            isRacing = false; playSound('win');
+            let winner = ducks.find(d => d.id === winnerId);
+            if (winner) {
+                document.getElementById('win-name').innerText = "Vịt #" + winner.id;
+                document.getElementById('winner-screen').style.display = 'flex';
+                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+                drawWinnerAvatar(winner);
+
+                let prizeName = "Vô Địch";
+                let prizeItem = "";
+
+                if (currentPrizeIndex !== -1) {
+                    const p = prizes[currentPrizeIndex];
+                    prizeName = p.name;
+                    prizeItem = p.item;
+
+                    prizes[currentPrizeIndex].quantity--;
+                    localStorage.setItem('lucky_draw_prizes', JSON.stringify(prizes));
+                    updatePrizeUI();
+                }
+
+                saveWinnerToSystem({
+                    name: "Vịt #" + winner.id,
+                    id: "",
+                    prize: prizeName,
+                    prizeItem: prizeItem,
+                    timestamp: Date.now(),
+                    gameType: "Đua Vịt"
+                });
+            }
+        }
+
+        function saveWinnerToSystem(winnerData) {
+            let winners = JSON.parse(localStorage.getItem('lucky_draw_winners') || '[]');
+            winners.push(winnerData);
+            localStorage.setItem('lucky_draw_winners', JSON.stringify(winners));
+        }
+
+        function resetGame() {
+            isRacing = false;
+            ducks = []; rocks = []; bananas = []; logs = [];
+            document.getElementById('timer').innerText = "00:00.0";
+            document.getElementById('winner-screen').style.display = 'none';
+            document.getElementById('scenario-alert').style.transform = "translateX(-50%) scale(0)";
+            document.getElementById('rank-list').innerHTML = "---";
+            cameraX = 0;
+            requestAnimationFrame(() => {
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = "#4fc3f7";
+                ctx.fillRect(0, 0, width, height);
+                drawEnvironment(0);
+            });
+        }
+
+        function updateTimerUI(elapsed) {
+            let ms = Math.floor((elapsed % 1000) / 100);
+            let s = Math.floor((elapsed / 1000) % 60);
+            let m = Math.floor(elapsed / 60000);
+            document.getElementById('timer').innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s) + "." + ms;
+        }
+
+        function updateRankUI() { let sorted = [...ducks].sort((a, b) => b.x - a.x); let html = ""; for (let i = 0; i < Math.min(5, sorted.length); i++) { html += `<div class="r-item"><span class="${i === 0 ? 'r-1' : ''}">#${sorted[i].id}</span></div>`; } document.getElementById('rank-list').innerHTML = html; }
+
+        function drawWinnerAvatar(duck) {
+            const c = document.getElementById('win-canvas');
+            const cx = c.getContext('2d');
+            cx.clearRect(0, 0, c.width, c.height);
+
+            cx.save();
+            cx.translate(c.width / 2, c.height / 2);
+            cx.scale(3, 3);
+
+            cx.shadowColor = "rgba(0,0,0,0.2)"; cx.shadowBlur = 4; cx.shadowOffsetY = 2;
+            cx.fillStyle = "#ffeb3b";
+            cx.beginPath(); cx.ellipse(0, 5, 22, 14, 0, 0, Math.PI * 2); cx.arc(10, -10, 15, 0, Math.PI * 2); cx.moveTo(-10, 0); cx.lineTo(-30, -8); cx.lineTo(-20, 8); cx.fill();
+            cx.shadowBlur = 0; cx.shadowOffsetY = 0; cx.lineWidth = 1.5; cx.strokeStyle = "#f57f17"; cx.stroke();
+            cx.fillStyle = "#fbc02d";
+            cx.beginPath(); cx.ellipse(-5, 5, 12, 7, 0.2, 0, Math.PI * 2); cx.fill(); cx.stroke();
+            cx.fillStyle = "#ff6f00"; cx.beginPath(); cx.moveTo(22, -8); cx.quadraticCurveTo(35, -12, 35, -5); cx.quadraticCurveTo(30, -2, 22, -5); cx.fill(); cx.stroke();
+            cx.fillStyle = "white"; cx.beginPath(); cx.arc(14, -12, 5, 0, Math.PI * 2); cx.fill();
+            cx.fillStyle = "black"; cx.beginPath(); cx.arc(15, -12, 2, 0, Math.PI * 2); cx.fill();
+            if (duck.hat) { cx.fillStyle = duck.hat; cx.lineWidth = 1; cx.strokeStyle = "black"; cx.beginPath(); cx.rect(6, -30, 10, 8); cx.rect(2, -22, 18, 4); cx.fill(); cx.stroke(); }
+            cx.fillStyle = "white"; cx.fillRect(-18, 2, 20, 16); cx.strokeRect(-18, 2, 20, 16);
+            cx.fillStyle = "black"; cx.font = "bold 11px Arial"; cx.textAlign = "center"; cx.textBaseline = "middle"; cx.fillText(duck.id, -8, 10);
+
+            cx.restore();
+        }
+
+        function spawnRock(targetDuck) { }
+        function drawWater(camX) { ctx.fillStyle = "#4fc3f7"; ctx.fillRect(0, 0, width, height); }
+        function drawEnvironment(camX) {
+            if (!envCached || envCanvas.width !== width || envCanvas.height !== height) {
+                envCanvas.width = width;
+                envCanvas.height = height;
+                envCtx.fillStyle = "#4fc3f7";
+                envCtx.fillRect(0, 0, width, height);
+
+                // Simple clouds
+                envCtx.fillStyle = "rgba(255, 255, 255, 0.6)";
+                for (let i = 0; i < 10; i++) {
+                    let cx = Math.random() * width;
+                    let cy = Math.random() * (height / 2);
+                    envCtx.beginPath(); envCtx.arc(cx, cy, 30, 0, Math.PI * 2); envCtx.fill();
+                }
+                envCached = true;
+            }
+            ctx.drawImage(envCanvas, 0, 0);
+
+            // Draw Finish Line
+            let screenFinish = START_LINE + TRACK_LENGTH - camX;
+            if (screenFinish > -100 && screenFinish < width + 100) {
+                ctx.fillStyle = "#d32f2f";
+                ctx.fillRect(screenFinish, 0, 10, height);
+                ctx.fillStyle = "#fff";
+                for (let y = 0; y < height; y += 40) ctx.fillRect(screenFinish + 10, y, 10, 20);
+                ctx.fillStyle = "#000";
+                for (let y = 20; y < height; y += 40) ctx.fillRect(screenFinish + 10, y, 10, 20);
+            }
+        }
+
+        // --- DRAWING OBJECTS ---
+        function drawLogs() {
+            ctx.fillStyle = "#795548"; ctx.strokeStyle = "#3e2723"; ctx.lineWidth = 2;
+            logs.forEach(l => {
+                let sx = l.x - cameraX;
+                if (sx > -100 && sx < width + 100) {
+                    ctx.save(); ctx.translate(sx, l.y); ctx.rotate(l.angle);
+                    ctx.fillRect(-l.width / 2, -l.height / 2, l.width, l.height);
+                    ctx.strokeRect(-l.width / 2, -l.height / 2, l.width, l.height);
+                    ctx.restore();
+                }
+            });
+        }
+        function drawBananas() {
+            ctx.fillStyle = "#ffeb3b"; ctx.strokeStyle = "#fbc02d";
+            bananas.forEach(b => {
+                if (!b.active) return;
+                let sx = b.x - cameraX;
+                if (sx > -50 && sx < width + 50) {
+                    ctx.beginPath(); ctx.arc(sx, b.y, 15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                }
+            });
+        }
+        function drawRocks() { }
+
+        function drawDucks() {
+            ducks.forEach(d => {
+                let sx = d.x - cameraX;
+                // Check if duck is within viewable area (with some padding)
+                if (sx > -100 && sx < width + 100) {
+                    ctx.save();
+                    ctx.translate(sx, d.y);
+                    ctx.rotate(d.visualAngle || 0);
+
+                    // Simple Duck Draw
+                    ctx.fillStyle = "#ffeb3b";
+                    ctx.beginPath(); ctx.ellipse(0, 0, 20, 12, 0, 0, Math.PI * 2); ctx.fill(); // Body
+                    ctx.beginPath(); ctx.arc(10, -10, 12, 0, Math.PI * 2); ctx.fill(); // Head
+                    ctx.fillStyle = "#ff9800"; ctx.beginPath(); ctx.moveTo(20, -10); ctx.lineTo(30, -5); ctx.lineTo(20, 0); ctx.fill(); // Beak
+                    ctx.fillStyle = "black"; ctx.beginPath(); ctx.arc(14, -12, 2, 0, Math.PI * 2); ctx.fill(); // Eye
+
+                    // Hat
+                    if (d.hat) {
+                        ctx.fillStyle = d.hat;
+                        ctx.fillRect(5, -25, 10, 10);
+                    }
+
+                    // ID
+                    ctx.fillStyle = "#fff"; ctx.fillRect(-15, -5, 15, 12);
+                    ctx.fillStyle = "#000"; ctx.font = "10px Arial"; ctx.fillText(d.id, -12, 4);
+
+                    ctx.restore();
+                }
+            });
+        }
+
+        // Start Loop
+        requestAnimationFrame(loop);
+
+    </script>
+</body>
+
+</html>
