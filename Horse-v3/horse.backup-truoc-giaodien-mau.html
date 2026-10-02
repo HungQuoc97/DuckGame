@@ -454,8 +454,7 @@
         /* Rank Board (Adapted for Game Stage) */
         .rank-board {
             position: absolute;
-            top: 96px;
-            /* nhường chỗ cho thanh tiến độ + bộ đếm phía trên */
+            top: 20px;
             right: 20px;
             width: 190px;
             background: #FFFDF3;
@@ -506,66 +505,6 @@
             margin-left: 5px;
             text-transform: uppercase;
             color: #fff;
-        }
-
-        /* Bình luận viên (góc dưới bên trái) */
-        #commentary {
-            position: absolute;
-            left: 34px;
-            bottom: 18px;
-            max-width: 60%;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-            padding: 8px 22px 8px 50px;
-            background: linear-gradient(180deg, rgba(55, 55, 55, 0.92) 0%, rgba(25, 25, 25, 0.92) 100%);
-            border: 2px solid rgba(255, 255, 255, 0.35);
-            border-radius: 14px;
-            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
-            color: #fff;
-            font-family: 'Baloo 2', 'Roboto Condensed', sans-serif;
-            font-size: 20px;
-            font-weight: 700;
-            line-height: 1.2;
-            pointer-events: none;
-            z-index: 60;
-        }
-
-        #commentary .mic {
-            position: absolute;
-            left: -22px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 54px;
-            height: 54px;
-            border-radius: 50%;
-            background: #fff;
-            border: 3px solid #263238;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
-        }
-
-        #commentary b {
-            color: #FFD54F;
-        }
-
-        #commentary-text.pop {
-            animation: commentPop 0.35s ease-out;
-        }
-
-        @keyframes commentPop {
-            from {
-                opacity: 0;
-                transform: translateX(14px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
         }
 
         /* Scenario Alert */
@@ -828,12 +767,6 @@
             <div class="rank-board">
                 <div class="rank-title">BẢNG XẾP HẠNG</div>
                 <div id="rank-list">---</div>
-            </div>
-
-            <!-- Bình luận viên -->
-            <div id="commentary">
-                <div class="mic">🎤</div>
-                <span id="commentary-text">Bấm BẮT ĐẦU để xuất phát!</span>
             </div>
 
             <div id="world-layer"></div>
@@ -1169,7 +1102,6 @@
                 ctx.save();
                 drawBackground(0); // Draw background at initial position
                 drawTrackMarkings(0);
-                drawHUD();
                 // Also draw track markings needs to be after background translated? 
                 // Wait, drawBackground handles global rects. 
                 // drawTrackMarkings handles lines.
@@ -1241,7 +1173,6 @@
                             if (!b.active) continue;
                             if (Math.hypot(dX - b.x, dY - b.y) < 30) {
                                 d.status = 'SLIPPING'; d.statusTimer = 40; b.active = false; playSound('slip');
-                                announce(`<b>${esc(horseName(d))}</b> trượt vỏ chuối! 🍌`);
                                 BODY.setVelocity(d.body, { x: d.body.velocity.x * 0.5, y: (Math.random() - 0.5) * 5 });
                                 break;
                             }
@@ -1327,20 +1258,15 @@
             if (flashOpacity > 0) { ctx.fillStyle = `rgba(255, 255, 255, ${flashOpacity})`; ctx.fillRect(cameraX, 0, width, height); }
 
             ctx.restore();
-            drawHUD(); // thanh tiến độ + bộ đếm về đích
 
             if (isRacing) updateRankUI();
-            if (isRacing) updateCommentary(leaderX);
 
             // Check Finish: ghi nhận thứ tự về đích, đủ TOP_N ngựa thì kết thúc
             if (isRacing && leaderX >= FINISH_LINE) {
                 let newFinishers = ducks
                     .filter(d => !d.finished && d.body.position.x >= FINISH_LINE)
                     .sort((a, b) => b.body.position.x - a.body.position.x);
-                newFinishers.forEach(d => {
-                    d.finished = true; finishers.push(d);
-                    announce(`<b>${esc(horseName(d))}</b> về đích thứ ${finishers.length}!`, true);
-                });
+                newFinishers.forEach(d => { d.finished = true; finishers.push(d); });
                 if (finishers.length >= winnersNeeded) endGame(finishers.slice(0, winnersNeeded));
             }
             // Hết giờ (dự phòng): quá thời gian đã đặt 3 giây mà chưa đủ ngựa về đích thì lấy theo vị trí hiện tại
@@ -1359,7 +1285,6 @@
                     let angle = (d.status === 'SLIPPING') ? 0.5 : 0;
                     let visualY = d.body.position.y + d.gallopOffset;
                     d.element.style.transform = `translate(${d.body.position.x}px, ${visualY}px) rotate(${angle}rad)`;
-                    d.element.style.zIndex = Math.round(d.body.position.y); // ngựa ở gần che ngựa ở xa
                 }
             });
         }
@@ -1396,20 +1321,17 @@
             const top = TOP_MARGIN;
             const trackH = height - top;
 
-            // 1. Cỏ sọc thẳng
-            const stripe = 170, skew = 0; // sọc và vạch mốc thẳng đứng (đặt > 0 để nghiêng)
-            ctx.fillStyle = isRainMode ? "#4E9A3C" : "#5DBB4C";
+            // 1. Cỏ sọc kiểu sân đua anime
+            const stripe = 160;
+            ctx.fillStyle = isRainMode ? "#4E9A3C" : "#5FBF4E";
             ctx.fillRect(camX, top, width, trackH);
-            ctx.fillStyle = isRainMode ? "#58A345" : "#6CC85A";
-            ctx.beginPath();
-            for (let x = Math.floor((camX - skew) / (stripe * 2)) * stripe * 2; x < camX + width; x += stripe * 2) {
-                ctx.moveTo(x, top); ctx.lineTo(x + stripe, top);
-                ctx.lineTo(x + stripe + skew, height); ctx.lineTo(x + skew, height); ctx.closePath();
+            ctx.fillStyle = isRainMode ? "#58A345" : "#70CC5E";
+            for (let x = Math.floor(camX / (stripe * 2)) * stripe * 2; x < camX + width; x += stripe * 2) {
+                ctx.fillRect(x, top, stripe, trackH);
             }
-            ctx.fill();
 
             // 2. Khóm cỏ nhỏ
-            ctx.strokeStyle = isRainMode ? "rgba(27, 94, 32, 0.4)" : "rgba(46, 125, 50, 0.4)";
+            ctx.strokeStyle = isRainMode ? "rgba(27, 94, 32, 0.45)" : "rgba(46, 125, 50, 0.45)";
             ctx.lineWidth = 2; ctx.lineCap = "round";
             ctx.beginPath();
             for (let gx = Math.floor(camX / 130) * 130; gx < camX + width + 130; gx += 130) {
@@ -1423,34 +1345,47 @@
             }
             ctx.stroke();
 
-            // 3. Bóng mờ của hàng rào đổ xuống mép trên đường đua
-            const railShadow = ctx.createLinearGradient(0, top, 0, top + 26);
-            railShadow.addColorStop(0, "rgba(0, 0, 0, 0.18)"); railShadow.addColorStop(1, "rgba(0, 0, 0, 0)");
-            ctx.fillStyle = railShadow; ctx.fillRect(camX, top, width, 26);
-
-            // 4. Cột mốc khoảng cách
-            for (let x = 0; x <= MAP_LENGTH; x += 1000) {
-                if (x < camX - 200 || x > camX + width + 200) continue;
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.4)"; ctx.lineWidth = 3; ctx.setLineDash([14, 12]);
-                ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x + skew, height); ctx.stroke();
-                ctx.setLineDash([]);
-                toonRect(x - 30, top - 66, 60, 26, 13, "#FFF59D");
-                ctx.fillStyle = INK; ctx.font = `800 15px ${TOON_FONT}`;
-                ctx.textAlign = "center"; ctx.textBaseline = "middle";
-                ctx.fillText((x / 10) + "m", x, top - 52);
+            // 3. Vạch làn
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+            ctx.lineWidth = 2;
+            if (ducks.length > 0) {
+                let laneH = (height - TOP_MARGIN - 100) / ducks.length;
+                for (let y = TOP_MARGIN; y < height; y += laneH * 2) {
+                    ctx.beginPath(); ctx.moveTo(camX, y); ctx.lineTo(camX + width, y); ctx.stroke();
+                }
             }
 
-            // 5. Vạch xuất phát
+            // 4. Rào trắng phía dưới
+            ctx.fillStyle = "#FFFFFF"; ctx.strokeStyle = INK; ctx.lineWidth = 2;
+            for (let x = Math.floor(camX / 60) * 60; x < camX + width + 60; x += 60) {
+                ctx.beginPath(); ctx.rect(x - 3, height - 16, 6, 16); ctx.fill(); ctx.stroke();
+            }
+            ctx.beginPath(); ctx.rect(camX - 10, height - 12, width + 20, 5); ctx.fill(); ctx.stroke();
+
+            // 5. Cột mốc khoảng cách
+            for (let x = 0; x <= MAP_LENGTH; x += 1000) {
+                if (x < camX - 200 || x > camX + width + 200) continue;
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.45)"; ctx.lineWidth = 3; ctx.setLineDash([14, 12]);
+                ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, height); ctx.stroke();
+                ctx.setLineDash([]);
+                toonRect(x - 3, top - 40, 6, 44, 3, "#FFFFFF", 2);
+                toonRect(x - 30, top - 64, 60, 26, 13, "#FFF59D");
+                ctx.fillStyle = INK; ctx.font = `800 15px ${TOON_FONT}`;
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText((x / 10) + "m", x, top - 50);
+            }
+
+            // 6. Vạch xuất phát
             ctx.fillStyle = "#FFFFFF";
             for (let y = TOP_MARGIN; y < height; y += 40) {
                 ctx.fillRect(START_LINE, y, 20, 20);
                 ctx.fillRect(START_LINE + 20, y + 20, 20, 20);
             }
             ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.strokeRect(START_LINE, top, 40, trackH);
-            toonRect(START_LINE - 22, top - 68, 84, 28, 14, "#4FC3F7", 3);
-            toonText("START", START_LINE + 20, top - 54, 17, "#FFFFFF");
+            toonRect(START_LINE - 22, top - 64, 84, 28, 14, "#4FC3F7", 3);
+            toonText("START", START_LINE + 20, top - 50, 17, "#FFFFFF");
 
-            // 6. Cổng đích
+            // 7. Cổng đích
             const finishX = FINISH_LINE;
             const finishWidth = 80;
             for (let y = TOP_MARGIN; y < height; y += 40) {
@@ -1460,19 +1395,20 @@
                 ctx.fillRect(finishX + 50, y, 40, 40);
             }
             ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.strokeRect(finishX + 10, top, finishWidth, trackH);
-            drawStripedPost(finishX - 6, top - 74, 14, trackH + 74);
-            drawStripedPost(finishX + finishWidth + 6, top - 74, 14, trackH + 74);
+            drawStripedPost(finishX - 6, top - 84, 14, trackH + 84);
+            drawStripedPost(finishX + finishWidth + 6, top - 84, 14, trackH + 84);
+            // Dây cờ đuôi nheo giữa 2 cột (ngay dưới băng rôn)
             const flagColors = ["#FFD54F", "#4FC3F7", "#FF8A80", "#AED581"];
             ctx.strokeStyle = INK; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(finishX + 1, top - 46); ctx.lineTo(finishX + finishWidth + 13, top - 46); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(finishX + 1, top - 56); ctx.lineTo(finishX + finishWidth + 13, top - 56); ctx.stroke();
             for (let i = 0; i < 5; i++) {
                 const fx = finishX + 6 + i * 17;
                 ctx.fillStyle = flagColors[i % 4]; ctx.strokeStyle = INK; ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.moveTo(fx, top - 46); ctx.lineTo(fx + 14, top - 46); ctx.lineTo(fx + 7, top - 32); ctx.closePath();
+                ctx.beginPath(); ctx.moveTo(fx, top - 56); ctx.lineTo(fx + 14, top - 56); ctx.lineTo(fx + 7, top - 42); ctx.closePath();
                 ctx.fill(); ctx.stroke();
             }
-            toonRect(finishX - 26, top - 82, finishWidth + 64, 34, 12, "#FF5252", 3);
-            toonText("FINISH", finishX + finishWidth / 2 + 6, top - 65, 21, "#FFEB3B");
+            toonRect(finishX - 26, top - 96, finishWidth + 64, 36, 12, "#FF5252", 3);
+            toonText("FINISH", finishX + finishWidth / 2 + 6, top - 78, 22, "#FFEB3B");
         }
 
         // Vệt tốc độ kiểu anime (đậm hơn khi về gần đích)
@@ -1576,142 +1512,101 @@
             ctx.stroke();
         }
 
-        // Nền phía xa: dải cát, hàng cây xanh ngọc, rào trắng cột xanh
         function drawBackground(camX) {
             const H = TOP_MARGIN;
+            const t = globalTimer;
 
-            // 1. Dải cát (khán đài phía xa)
-            ctx.fillStyle = isRainMode ? "#B9AB8C" : "#EAD7A6";
-            ctx.fillRect(0, 0, width, 48);
-            ctx.fillStyle = isRainMode ? "rgba(90, 75, 50, 0.18)" : "rgba(160, 120, 60, 0.15)";
-            let sx = -((camX * 0.6) % 90); if (sx > 0) sx -= 90;
-            for (let x = sx; x < width + 90; x += 90) {
-                ctx.beginPath(); ctx.ellipse(x + 20, 30, 16, 3, 0, 0, Math.PI * 2); ctx.ellipse(x + 62, 40, 10, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+            // 1. Bầu trời (mưa thì xám)
+            const sky = ctx.createLinearGradient(0, 0, 0, H);
+            if (isRainMode) { sky.addColorStop(0, "#607D8B"); sky.addColorStop(1, "#B0BEC5"); }
+            else { sky.addColorStop(0, "#29B6F6"); sky.addColorStop(1, "#B3E5FC"); }
+            ctx.fillStyle = sky;
+            ctx.fillRect(0, 0, width, H);
+
+            // 2. Mặt trời có tia xoay chậm
+            if (!isRainMode) {
+                ctx.save(); ctx.translate(58, 32); ctx.rotate(t * 0.03);
+                ctx.strokeStyle = "rgba(255, 238, 88, 0.9)"; ctx.lineWidth = 4; ctx.lineCap = "round";
+                for (let i = 0; i < 10; i++) { ctx.rotate(Math.PI / 5); ctx.beginPath(); ctx.moveTo(25, 0); ctx.lineTo(35, 0); ctx.stroke(); }
+                ctx.restore();
+                ctx.fillStyle = "#FFEE58"; ctx.strokeStyle = "#F9A825"; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.arc(58, 32, 18, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             }
 
-            // 2. Hàng cây xanh ngọc có sọc
-            ctx.fillStyle = isRainMode ? "#1C7A66" : "#21A587";
-            ctx.fillRect(0, 48, width, 34);
-            ctx.fillStyle = isRainMode ? "#24907A" : "#35BE9E";
-            let hx = -((camX * 0.8) % 48); if (hx > 0) hx -= 48;
-            for (let x = hx; x < width + 48; x += 48) ctx.fillRect(x, 48, 22, 34);
-            ctx.fillStyle = isRainMode ? "#5FB8A2" : "#86E3CB"; ctx.fillRect(0, 48, width, 3);
-            ctx.fillStyle = isRainMode ? "#125647" : "#137761"; ctx.fillRect(0, 79, width, 3);
-
-            // 3. Dải cỏ sau rào
-            ctx.fillStyle = isRainMode ? "#4E9A3C" : "#5DBB4C";
-            ctx.fillRect(0, 82, width, H - 82);
-
-            // 4. Rào trắng cột xanh
-            ctx.strokeStyle = INK; ctx.lineWidth = 2;
-            let postX = -(camX % 70); if (postX > 0) postX -= 70;
-            for (let x = postX; x < width + 70; x += 70) {
-                ctx.fillStyle = "rgba(0, 0, 0, 0.15)"; ctx.fillRect(x - 1, H - 6, 10, 4);
-                ctx.fillStyle = "#2EAA55";
-                ctx.beginPath(); ctx.rect(x - 4, 90, 8, H - 92); ctx.fill(); ctx.stroke();
-            }
-            ctx.fillStyle = "#FFFFFF";
-            ctx.beginPath(); ctx.rect(-10, 88, width + 20, 9); ctx.fill(); ctx.stroke();
-            ctx.fillStyle = "#CFD8DC"; ctx.fillRect(-10, 94, width + 20, 2);
-        }
-
-        // Ghim cờ ở 2 đầu thanh tiến độ
-        function drawPin(cx, cy, color) {
-            ctx.fillStyle = color; ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
-            ctx.beginPath(); ctx.arc(cx, cy - 4, 9, Math.PI * 0.85, Math.PI * 2.15); ctx.lineTo(cx, cy + 12); ctx.closePath();
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = color === "#FFFFFF" ? "#90A4AE" : "#FFFFFF";
-            ctx.beginPath(); ctx.arc(cx, cy - 4, 3.5, 0, Math.PI * 2); ctx.fill();
-        }
-
-        // Thanh tiến độ cuộc đua (trên cùng) + bộ đếm "đã về đích / cần lấy"
-        function drawHUD() {
-            const x0 = 48, x1 = width - 48, y = 12, h = 18, mid = y + h / 2;
-            toonRect(x0 - 6, y - 5, x1 - x0 + 12, h + 10, 10, "#1E6B34", 3);
-            const segW = (x1 - x0) / 10;
-            for (let i = 0; i < 10; i++) {
-                ctx.fillStyle = i % 2 ? "#9CCC65" : "#B5DD7E";
-                ctx.fillRect(x0 + i * segW + 1.5, y, segW - 3, h);
-            }
-            drawPin(x0 - 24, mid, "#FFFFFF");
-            drawPin(x1 + 24, mid, "#FF5252");
-
-            if (ducks.length) {
-                const px = d => x0 + (x1 - x0) * Math.max(0, Math.min(1, (d.body.position.x - START_LINE) / (FINISH_LINE - START_LINE)));
-                ctx.strokeStyle = INK; ctx.lineWidth = 1.5;
-                ducks.forEach(d => {
-                    ctx.fillStyle = STRATEGIES[d.strategy].color;
-                    ctx.beginPath(); ctx.arc(px(d), mid, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                });
-                const ranked = [...finishers, ...ducks.filter(d => !d.finished).sort((a, b) => b.body.position.x - a.body.position.x)];
-                ctx.textAlign = "center"; ctx.textBaseline = "middle";
-                for (let i = Math.min(3, ranked.length) - 1; i >= 0; i--) {
-                    const bx = px(ranked[i]);
-                    ctx.fillStyle = ["#FFD54F", "#E0E0E0", "#FFAB91"][i]; ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
-                    ctx.beginPath(); ctx.arc(bx, mid, 12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = INK; ctx.font = `800 14px ${TOON_FONT}`; ctx.fillText(i + 1, bx, mid + 1);
-                }
+            // 3. Mây bồng bềnh (trôi chậm + thị sai)
+            const cloudSp = 330, cOff = camX * 0.08 + t * 3, cBase = Math.floor(cOff / cloudSp);
+            for (let i = -1; i <= Math.ceil(width / cloudSp) + 1; i++) {
+                const k = cBase + i, v = ((k % 3) + 3) % 3;
+                drawToonCloud(k * cloudSp - cOff + v * 45, 20 + (v % 2) * 16, 0.75 + v * 0.15);
             }
 
-            // Bộ đếm kiểu "6/16": số ngựa đã về đích / số cần lấy (hộp ngay trên bảng xếp hạng)
-            const done = String(finishers.length), need = "/" + winnersNeeded;
-            const bx0 = width - 216, bw = 196, by0 = 44, bh = 46;
-            ctx.fillStyle = "rgba(33, 33, 33, 0.9)"; ctx.strokeStyle = "rgba(255, 255, 255, 0.85)"; ctx.lineWidth = 2.5;
-            ctx.beginPath(); ctx.roundRect(bx0, by0, bw, bh, 14); ctx.fill(); ctx.stroke();
-            ctx.fillStyle = "#FFFFFF"; ctx.font = `800 15px ${TOON_FONT}`;
-            ctx.textAlign = "left"; ctx.textBaseline = "middle";
-            ctx.fillText("🏁 VỀ ĐÍCH", bx0 + 14, by0 + bh / 2 + 1);
-            ctx.textBaseline = "alphabetic"; ctx.textAlign = "left"; ctx.lineJoin = "round";
-            ctx.font = `800 24px ${TOON_FONT}`; const wNeed = ctx.measureText(need).width;
-            ctx.font = `800 36px ${TOON_FONT}`; const wDone = ctx.measureText(done).width;
-            const rx = bx0 + bw - 14, by = by0 + bh - 9;
-            ctx.lineWidth = 5; ctx.strokeStyle = INK;
-            ctx.strokeText(done, rx - wNeed - wDone, by); ctx.fillStyle = "#FF9800"; ctx.fillText(done, rx - wNeed - wDone, by);
-            ctx.font = `800 24px ${TOON_FONT}`; ctx.lineWidth = 4;
-            ctx.strokeText(need, rx - wNeed, by); ctx.fillStyle = "#FFFFFF"; ctx.fillText(need, rx - wNeed, by);
-        }
+            // 4. Đồi xa (2 lớp)
+            drawHills(camX * 0.15, H - 34, 30, 230, isRainMode ? "#8FA5A0" : "#AED581", isRainMode ? "#6B807B" : "#7CB342");
+            drawHills(camX * 0.3 + 500, H - 20, 22, 160, isRainMode ? "#6E8F70" : "#7CCB5A", isRainMode ? "#4F6E52" : "#43A047");
 
-        // ===== BÌNH LUẬN VIÊN =====
-        let lastAnnounce = 0, lastLeaderId = null, announcedHalf = false, announcedSprint = false;
-        const esc = v => String(v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-        function horseName(d) { return (d.participant && d.participant.name) ? d.participant.name : ("Ngựa " + d.id); }
-
-        function announce(html, force) {
-            const now = Date.now();
-            if (!force && now - lastAnnounce < 2500) return; // tránh đổi chữ liên tục
-            lastAnnounce = now;
-            const el = document.getElementById('commentary-text');
-            if (!el) return;
-            el.innerHTML = html;
-            el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
-        }
-
-        function resetCommentary() {
-            lastAnnounce = 0; lastLeaderId = null; announcedHalf = false; announcedSprint = false;
-            announce(`Các chú ngựa đã xuất phát! ${isRainMode ? "Trời mưa lớn, đường đua trơn trượt!" : "Thời tiết thật đẹp!"}`, true);
-        }
-
-        function updateCommentary(leaderX) {
-            if (!ducks.length) return;
-            let leader = null;
-            ducks.forEach(d => { if (!d.finished && (!leader || d.body.position.x > leader.body.position.x)) leader = d; });
-            if (!leader) return;
-            const progress = (leaderX - START_LINE) / (FINISH_LINE - START_LINE);
-            if (!announcedHalf && progress >= 0.5) {
-                announcedHalf = true;
-                announce(`Đã qua nửa chặng đua, <b>${esc(horseName(leader))}</b> đang dẫn đầu!`, true);
-            } else if (!announcedSprint && progress >= 0.85) {
-                announcedSprint = true;
-                announce(`Nước rút! Chỉ còn ${Math.max(0, Math.round((FINISH_LINE - leaderX) / 10))}m nữa!`, true);
-            } else if (finishers.length === 0 && leader.dbId !== lastLeaderId) {
-                const isFirst = lastLeaderId === null;
-                if (isFirst || Date.now() - lastAnnounce >= 2500) {
-                    lastLeaderId = leader.dbId;
-                    if (!isFirst) announce(`<b>${esc(horseName(leader))}</b> vươn lên dẫn đầu!`);
-                }
-            } else if (finishers.length === 0 && Date.now() - lastAnnounce > 5000) {
-                announce(`<b>${esc(horseName(leader))}</b> đang dẫn đầu.`);
+            // 5. Cây tròn hoạt hình
+            const treeSp = 210, tOff = camX * 0.5, tBase = Math.floor(tOff / treeSp);
+            for (let i = -1; i <= Math.ceil(width / treeSp) + 1; i++) {
+                const k = tBase + i, v = ((k % 4) + 4) % 4;
+                drawToonTree(k * treeSp - tOff + v * 30, H - 14, 0.8 + v * 0.1, v);
             }
+
+            // 6. Dải cỏ + rào trắng mép trong đường đua
+            ctx.fillStyle = isRainMode ? "#558B2F" : "#8BC34A";
+            ctx.fillRect(0, H - 14, width, 14);
+            ctx.fillStyle = "#FFFFFF"; ctx.strokeStyle = INK; ctx.lineWidth = 2;
+            let postX = -(camX % 60); if (postX > 0) postX -= 60;
+            for (let x = postX; x < width + 60; x += 60) {
+                ctx.beginPath(); ctx.rect(x - 3, H - 24, 6, 22); ctx.fill(); ctx.stroke();
+            }
+            ctx.beginPath(); ctx.rect(-10, H - 22, width + 20, 5); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.rect(-10, H - 12, width + 20, 4); ctx.fill(); ctx.stroke();
+        }
+
+        // Đám mây: vẽ viền trước rồi tô đè để chỉ còn viền ngoài, nửa dưới đổ bóng nhạt
+        function drawToonCloud(x, y, sc) {
+            const puffs = [[0, 8, 13], [15, 0, 17], [34, 3, 15], [50, 9, 11], [24, 11, 13]];
+            ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc);
+            ctx.beginPath();
+            puffs.forEach(([px, py, r]) => { ctx.moveTo(px + r, py); ctx.arc(px, py, r, 0, Math.PI * 2); });
+            ctx.strokeStyle = isRainMode ? "#546E7A" : "#81D4FA"; ctx.lineWidth = 4; ctx.stroke();
+            ctx.fillStyle = isRainMode ? "#B0BEC5" : "#FFFFFF"; ctx.fill();
+            ctx.save(); ctx.beginPath(); ctx.rect(-20, 10, 90, 20); ctx.clip();
+            ctx.beginPath();
+            puffs.forEach(([px, py, r]) => { ctx.moveTo(px + r, py); ctx.arc(px, py, r, 0, Math.PI * 2); });
+            ctx.fillStyle = isRainMode ? "#90A4AE" : "#E1F5FE"; ctx.fill();
+            ctx.restore();
+            ctx.restore();
+        }
+
+        // Dãy đồi lượn sóng có viền
+        function drawHills(off, baseY, amp, wave, fill, line) {
+            ctx.beginPath(); ctx.moveTo(-10, TOP_MARGIN);
+            for (let x = -10; x <= width + 20; x += 20) {
+                const u = x + off;
+                ctx.lineTo(x, baseY - amp * (0.6 + 0.3 * Math.sin(u / wave) + 0.15 * Math.sin(u / (wave * 0.37))));
+            }
+            ctx.lineTo(width + 20, TOP_MARGIN); ctx.closePath();
+            ctx.fillStyle = fill; ctx.fill();
+            ctx.strokeStyle = line; ctx.lineWidth = 3; ctx.stroke();
+        }
+
+        // Cây tròn: thân nâu + tán 3 khối, viền đậm, có điểm sáng
+        function drawToonTree(x, bottomY, sc, v) {
+            const greens = isRainMode ? ["#2E7D32", "#33691E"] : ["#43A047", "#66BB6A"];
+            ctx.save(); ctx.translate(x, bottomY); ctx.scale(sc, sc);
+            ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
+            ctx.beginPath(); ctx.ellipse(0, 0, 18, 4, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = "#8D6E63"; ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.roundRect(-5, -20, 10, 21, 3); ctx.fill(); ctx.stroke();
+            const blobs = [[-11, -26, 12], [11, -27, 12], [0, -40, 15]];
+            ctx.beginPath();
+            blobs.forEach(([bx, by, r]) => { ctx.moveTo(bx + r, by); ctx.arc(bx, by, r, 0, Math.PI * 2); });
+            ctx.lineWidth = 5; ctx.stroke();
+            ctx.fillStyle = greens[v % 2]; ctx.fill();
+            ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+            ctx.beginPath(); ctx.ellipse(-5, -46, 5, 3, -0.5, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
         }
 
         function startGame() {
@@ -1744,7 +1639,6 @@
             let qty = parseInt(document.getElementById('inp-qty').value);
             let time = Math.max(10, Math.min(300, parseInt(document.getElementById('inp-time').value) || 30)); // Thời gian kết thúc (giây) đặt ở bảng điều khiển
             raceTime = time; paceMult = 1; raceFrames = 0;
-            resetCommentary();
             try { localStorage.setItem('horse_v3_time', time); } catch (e) { }
             // Calculate avg speed based on time
             let avgSpeed = (FINISH_LINE - START_LINE) / (time * 60);
@@ -1887,7 +1781,6 @@
 
         function endGame(topList) {
             isRacing = false;
-            announce(`Cuộc đua kết thúc! Chúc mừng TOP ${topList.length}!`, true);
             const winner = topList[0];
             playSound('win');
             playSound('fireworks_start'); // Trigger fireworks sound
