@@ -7,7 +7,7 @@
     <title>Survival Derby - V3 (Realistic)</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link
-        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;900&family=Roboto+Condensed:wght@700&family=Baloo+2:wght@600;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;900&family=Roboto+Condensed:wght@700&display=swap"
         rel="stylesheet">
     <link rel="icon" href="../images.png" type="image/x-icon">
 
@@ -109,9 +109,8 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-radius: 20px;
-            border: 4px solid #263238;
-            /* viền đậm kiểu hoạt hình */
-            box-shadow: 8px 8px 0 rgba(38, 50, 56, 0.85), 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             display: flex;
             overflow: hidden;
             position: relative;
@@ -456,46 +455,40 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 190px;
-            background: #FFFDF3;
-            border-radius: 16px;
-            padding: 12px 14px;
-            color: #263238;
-            border: 3px solid #263238;
-            box-shadow: 5px 5px 0 rgba(38, 50, 56, 0.85);
-            font-family: 'Baloo 2', 'Roboto Condensed', sans-serif;
+            width: 180px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            padding: 15px;
+            color: white;
+            border: 1px solid rgba(255, 215, 0, 0.3);
             pointer-events: none;
             z-index: 50;
         }
 
         .rank-title {
             text-align: center;
-            font-weight: 800;
-            background: #FF5252;
-            color: #fff;
-            border: 2.5px solid #263238;
-            border-radius: 999px;
-            padding: 2px 0;
-            margin: -2px 0 8px;
+            font-weight: 900;
+            border-bottom: 2px solid #444;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            color: #aaa;
             letter-spacing: 1px;
-            font-size: 13px;
-            text-shadow: 1px 1px 0 #263238;
+            font-size: 12px;
         }
 
         .r-item {
             display: flex;
             justify-content: space-between;
-            border-bottom: 2px dashed rgba(38, 50, 56, 0.12);
-            padding: 3px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 5px 0;
             align-items: center;
             font-size: 13px;
-            font-weight: 600;
-            line-height: 1.25;
         }
 
         .r-1 {
-            color: #E65100;
-            font-weight: 800;
+            color: #ffeb3b;
+            font-weight: bold;
         }
 
         .strat-tag {
@@ -521,10 +514,8 @@
             text-transform: uppercase;
             font-size: 24px;
             pointer-events: none;
-            border: 4px solid #263238;
-            box-shadow: 6px 6px 0 rgba(38, 50, 56, 0.85);
-            font-family: 'Baloo 2', 'Roboto Condensed', sans-serif;
-            text-shadow: 2px 2px 0 #263238;
+            border: 3px solid #66bb6a;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 150;
             text-align: center;
@@ -796,7 +787,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script>
-        const horseGifSrc = 'horse.gif';
+        const horseGifSrc = 'hourse.gif';
         const horseImgStatic = new Image();
         horseImgStatic.src = horseGifSrc;
 
@@ -1247,8 +1238,6 @@
             ctx.translate(-cameraX, 0);
 
             drawTrackMarkings(cameraX);
-            drawSpeedLines(leaderX);
-            drawShadows();
             drawDust();
             drawLogs();
             drawBananas();
@@ -1289,64 +1278,8 @@
             });
         }
 
-        // ===== PHONG CÁCH HOẠT HÌNH (ANIME) =====
-        const INK = "#263238"; // màu viền đậm kiểu hoạt hình
-        const TOON_FONT = "'Baloo 2', 'Roboto Condensed', Arial, sans-serif";
-        let speedLines = [];
-
-        // Hình chữ nhật bo góc có viền đậm
-        function toonRect(x, y, w, h, r, fill, lw = 2.5) {
-            ctx.fillStyle = fill; ctx.strokeStyle = INK; ctx.lineWidth = lw;
-            ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fill(); ctx.stroke();
-        }
-
-        // Chữ có viền (kiểu chữ truyện tranh)
-        function toonText(text, x, y, size, fill, stroke = INK) {
-            ctx.font = `800 ${size}px ${TOON_FONT}`;
-            ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.lineJoin = "round"; ctx.lineWidth = Math.max(3, size / 5); ctx.strokeStyle = stroke;
-            ctx.strokeText(text, x, y);
-            ctx.fillStyle = fill; ctx.fillText(text, x, y);
-        }
-
-        // Cột cổng sọc đỏ trắng
-        function drawStripedPost(x, y, w, h) {
-            ctx.fillStyle = "#FFFFFF"; ctx.fillRect(x, y, w, h);
-            ctx.fillStyle = "#FF5252";
-            for (let yy = y; yy < y + h; yy += 24) ctx.fillRect(x, yy, w, Math.min(12, y + h - yy));
-            ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.strokeRect(x, y, w, h);
-        }
-
         function drawTrackMarkings(camX) {
-            const top = TOP_MARGIN;
-            const trackH = height - top;
-
-            // 1. Cỏ sọc kiểu sân đua anime
-            const stripe = 160;
-            ctx.fillStyle = isRainMode ? "#4E9A3C" : "#5FBF4E";
-            ctx.fillRect(camX, top, width, trackH);
-            ctx.fillStyle = isRainMode ? "#58A345" : "#70CC5E";
-            for (let x = Math.floor(camX / (stripe * 2)) * stripe * 2; x < camX + width; x += stripe * 2) {
-                ctx.fillRect(x, top, stripe, trackH);
-            }
-
-            // 2. Khóm cỏ nhỏ
-            ctx.strokeStyle = isRainMode ? "rgba(27, 94, 32, 0.45)" : "rgba(46, 125, 50, 0.45)";
-            ctx.lineWidth = 2; ctx.lineCap = "round";
-            ctx.beginPath();
-            for (let gx = Math.floor(camX / 130) * 130; gx < camX + width + 130; gx += 130) {
-                for (let gy = top + 30; gy < height; gy += 95) {
-                    const h = Math.abs(Math.sin(gx * 12.9898 + gy * 78.233) * 43758.5453) % 1;
-                    const tx = gx + h * 110, ty = gy + h * 60;
-                    ctx.moveTo(tx - 5, ty - 6); ctx.lineTo(tx - 2, ty);
-                    ctx.moveTo(tx, ty - 9); ctx.lineTo(tx, ty);
-                    ctx.moveTo(tx + 5, ty - 6); ctx.lineTo(tx + 2, ty);
-                }
-            }
-            ctx.stroke();
-
-            // 3. Vạch làn
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
             ctx.lineWidth = 2;
             if (ducks.length > 0) {
                 let laneH = (height - TOP_MARGIN - 100) / ducks.length;
@@ -1355,149 +1288,92 @@
                 }
             }
 
-            // 4. Rào trắng phía dưới
-            ctx.fillStyle = "#FFFFFF"; ctx.strokeStyle = INK; ctx.lineWidth = 2;
-            for (let x = Math.floor(camX / 60) * 60; x < camX + width + 60; x += 60) {
-                ctx.beginPath(); ctx.rect(x - 3, height - 16, 6, 16); ctx.fill(); ctx.stroke();
-            }
-            ctx.beginPath(); ctx.rect(camX - 10, height - 12, width + 20, 5); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+            ctx.font = "bold 40px Impact";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "bottom";
 
-            // 5. Cột mốc khoảng cách
-            for (let x = 0; x <= MAP_LENGTH; x += 1000) {
-                if (x < camX - 200 || x > camX + width + 200) continue;
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.45)"; ctx.lineWidth = 3; ctx.setLineDash([14, 12]);
-                ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, height); ctx.stroke();
-                ctx.setLineDash([]);
-                toonRect(x - 3, top - 40, 6, 44, 3, "#FFFFFF", 2);
-                toonRect(x - 30, top - 64, 60, 26, 13, "#FFF59D");
-                ctx.fillStyle = INK; ctx.font = `800 15px ${TOON_FONT}`;
-                ctx.textAlign = "center"; ctx.textBaseline = "middle";
-                ctx.fillText((x / 10) + "m", x, top - 50);
-            }
-
-            // 6. Vạch xuất phát
-            ctx.fillStyle = "#FFFFFF";
+            // Draw Start Line (Simple Checkered)
+            ctx.fillStyle = "#fff";
             for (let y = TOP_MARGIN; y < height; y += 40) {
                 ctx.fillRect(START_LINE, y, 20, 20);
                 ctx.fillRect(START_LINE + 20, y + 20, 20, 20);
             }
-            ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.strokeRect(START_LINE, top, 40, trackH);
-            toonRect(START_LINE - 22, top - 64, 84, 28, 14, "#4FC3F7", 3);
-            toonText("START", START_LINE + 20, top - 50, 17, "#FFFFFF");
 
-            // 7. Cổng đích
+            // Draw Finish Line (Redesigned)
             const finishX = FINISH_LINE;
             const finishWidth = 80;
+
+            // 1. Vertical Posts
+            ctx.fillStyle = "#5D4037";
+            ctx.fillRect(finishX, TOP_MARGIN - 40, 10, height); // Left Post
+            ctx.fillRect(finishX + finishWidth, TOP_MARGIN - 40, 10, height); // Right Post
+
+            // 2. Banner / Arch
+            ctx.fillStyle = "#D32F2F";
+            ctx.fillRect(finishX, TOP_MARGIN - 60, finishWidth + 10, 40);
+
+            ctx.fillStyle = "#FFD700";
+            ctx.font = "bold 20px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("FINISH", finishX + finishWidth / 2 + 5, TOP_MARGIN - 40);
+
+            // 3. Ground Checkered Pattern
             for (let y = TOP_MARGIN; y < height; y += 40) {
-                ctx.fillStyle = (y % 80 === 0) ? "#fff" : "#263238";
+                // Column 1
+                ctx.fillStyle = (y % 80 === 0) ? "#fff" : "#000";
                 ctx.fillRect(finishX + 10, y, 40, 40);
-                ctx.fillStyle = (y % 80 === 0) ? "#263238" : "#fff";
+
+                // Column 2
+                ctx.fillStyle = (y % 80 === 0) ? "#000" : "#fff";
                 ctx.fillRect(finishX + 50, y, 40, 40);
             }
-            ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.strokeRect(finishX + 10, top, finishWidth, trackH);
-            drawStripedPost(finishX - 6, top - 84, 14, trackH + 84);
-            drawStripedPost(finishX + finishWidth + 6, top - 84, 14, trackH + 84);
-            // Dây cờ đuôi nheo giữa 2 cột (ngay dưới băng rôn)
-            const flagColors = ["#FFD54F", "#4FC3F7", "#FF8A80", "#AED581"];
-            ctx.strokeStyle = INK; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(finishX + 1, top - 56); ctx.lineTo(finishX + finishWidth + 13, top - 56); ctx.stroke();
-            for (let i = 0; i < 5; i++) {
-                const fx = finishX + 6 + i * 17;
-                ctx.fillStyle = flagColors[i % 4]; ctx.strokeStyle = INK; ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.moveTo(fx, top - 56); ctx.lineTo(fx + 14, top - 56); ctx.lineTo(fx + 7, top - 42); ctx.closePath();
-                ctx.fill(); ctx.stroke();
-            }
-            toonRect(finishX - 26, top - 96, finishWidth + 64, 36, 12, "#FF5252", 3);
-            toonText("FINISH", finishX + finishWidth / 2 + 6, top - 78, 22, "#FFEB3B");
-        }
 
-        // Vệt tốc độ kiểu anime (đậm hơn khi về gần đích)
-        function drawSpeedLines(leaderX) {
-            if (!isRacing) return;
-            const sprint = (leaderX - START_LINE) / (FINISH_LINE - START_LINE) > 0.85;
-            const n = sprint ? 26 : 14;
-            while (speedLines.length < n) speedLines.push({ x: -9999 });
-            ctx.save();
-            ctx.strokeStyle = `rgba(255, 255, 255, ${sprint ? 0.55 : 0.3})`;
-            ctx.lineCap = "round";
-            for (let i = 0; i < n; i++) {
-                const l = speedLines[i];
-                if (l.x + (l.len || 0) < 0) {
-                    l.x = width + Math.random() * width * 0.6;
-                    l.y = TOP_MARGIN + 15 + Math.random() * (height - TOP_MARGIN - 30);
-                    l.len = 60 + Math.random() * 160; l.spd = 18 + Math.random() * 16; l.w = 1.5 + Math.random() * 2.5;
-                }
-                l.x -= l.spd;
-                ctx.lineWidth = l.w;
-                ctx.beginPath(); ctx.moveTo(cameraX + l.x, l.y); ctx.lineTo(cameraX + l.x + l.len, l.y); ctx.stroke();
-            }
-            ctx.restore();
-        }
+            for (let x = 0; x <= MAP_LENGTH; x += 1000) {
+                if (x < camX - 200 || x > camX + width + 200) continue;
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+                ctx.beginPath(); ctx.moveTo(x, TOP_MARGIN); ctx.lineTo(x, height); ctx.stroke();
 
-        // Bóng tròn dưới chân ngựa (ngựa nhún lên thì bóng nhỏ lại)
-        function drawShadows() {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
-            ducks.forEach(d => {
-                ctx.beginPath();
-                ctx.ellipse(d.body.position.x + 2, d.body.position.y + 27, Math.max(14, 26 + d.gallopOffset * 1.5), 6, 0, 0, Math.PI * 2);
-                ctx.fill();
-            });
+                ctx.save();
+                ctx.translate(x, TOP_MARGIN + 20);
+                ctx.fillStyle = "rgba(255,255,255,0.6)";
+                ctx.fillText((x / 10) + "m", 0, 0);
+                ctx.restore();
+            }
         }
 
         function drawDust() {
-            ctx.lineWidth = 2;
             dusts.forEach(d => {
-                ctx.fillStyle = isRainMode ? `rgba(141, 110, 99, ${d.life})` : `rgba(255, 253, 240, ${d.life})`;
-                ctx.strokeStyle = isRainMode ? `rgba(62, 39, 35, ${d.life * 0.7})` : `rgba(141, 110, 99, ${d.life * 0.7})`;
-                ctx.beginPath(); ctx.arc(d.x, d.y, d.size, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = d.color + d.life + ")";
+                ctx.beginPath(); ctx.arc(d.x, d.y, d.size, 0, Math.PI * 2); ctx.fill();
             });
         }
 
         function drawLogs() {
+            ctx.fillStyle = "#4e342e"; ctx.strokeStyle = "#3e2723"; ctx.lineWidth = 3;
             logs.forEach(l => {
                 ctx.save(); ctx.translate(l.position.x, l.position.y); ctx.rotate(l.angle);
-                ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
-                ctx.beginPath(); ctx.ellipse(2, 13, 32, 6, 0, 0, Math.PI * 2); ctx.fill();
-                ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.fillStyle = "#A1887F";
-                ctx.beginPath(); ctx.roundRect(-30, -10, 60, 20, 9); ctx.fill(); ctx.stroke();
-                ctx.strokeStyle = "#6D4C41"; ctx.lineWidth = 2; ctx.lineCap = "round";
-                ctx.beginPath(); ctx.moveTo(-20, -3); ctx.lineTo(8, -3); ctx.moveTo(-10, 4); ctx.lineTo(14, 4); ctx.stroke();
-                ctx.fillStyle = "#FFE0B2"; ctx.strokeStyle = INK; ctx.lineWidth = 3;
-                ctx.beginPath(); ctx.ellipse(26, 0, 6, 10, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.strokeStyle = "#BCAAA4"; ctx.lineWidth = 1.5;
-                ctx.beginPath(); ctx.ellipse(26, 0, 2.5, 5, 0, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.roundRect(-30, -10, 60, 20, 5); ctx.fill(); ctx.stroke();
                 ctx.restore();
             });
         }
 
         function drawBananas() { ctx.font = "24px Arial"; ctx.textAlign = "center"; bananas.forEach(b => { if (b.active) ctx.fillText("🍌", b.x, b.y); }); }
 
-        // Thẻ tên kiểu anime: viền đậm, chấm màu chiến thuật, vương miện cho ngựa dẫn đầu, huy hiệu hạng khi về đích
         function drawHorseInfo() {
-            let leader = null;
-            ducks.forEach(d => { if (!d.finished && (!leader || d.body.position.x > leader.body.position.x)) leader = d; });
             ducks.forEach(d => {
-                const x = d.body.position.x;
-                const y = d.body.position.y + d.gallopOffset - 44;
-                const label = String(d.participant && d.participant.id ? d.participant.id : d.id);
-                const rank = d.finished ? finishers.indexOf(d) + 1 : 0;
-                const crowned = rank === 1 || (isRacing && finishers.length === 0 && d === leader);
+                let x = d.body.position.x;
+                let y = d.body.position.y + d.gallopOffset - 40;
                 ctx.save(); ctx.translate(x, y);
-                ctx.font = `800 13px ${TOON_FONT}`;
-                const w = ctx.measureText(label).width + 24;
-                toonRect(-w / 2, -11, w, 22, 11, crowned ? "#FFD54F" : "#FFFFFF");
+                if (d.status === 'SLIPPING') { ctx.font = "20px Arial"; ctx.fillText("💫", 0, 0); }
+
+                ctx.fillStyle = "white"; ctx.font = "bold 14px Arial"; ctx.textAlign = "center";
+                ctx.shadowColor = "black"; ctx.shadowBlur = 4;
+                ctx.fillText(d.participant && d.participant.id ? d.participant.id : d.id, 0, 0); // Display ID on horse
+
                 ctx.fillStyle = STRATEGIES[d.strategy].color;
-                ctx.beginPath(); ctx.arc(-w / 2 + 10, 0, 4.5, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = INK; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-                ctx.fillText(label, 5, 1);
-                if (rank) {
-                    ctx.fillStyle = rank <= 3 ? ["#FFD54F", "#E0E0E0", "#FFAB91"][rank - 1] : "#B39DDB";
-                    ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
-                    ctx.beginPath(); ctx.arc(w / 2 + 4, -9, 10, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = INK; ctx.font = `800 12px ${TOON_FONT}`; ctx.fillText(rank, w / 2 + 4, -8);
-                }
-                if (crowned) { ctx.font = "18px Arial"; ctx.fillText("👑", 0, -22); }
-                if (d.status === 'SLIPPING') { ctx.font = "18px Arial"; ctx.fillText("💫", crowned ? 22 : 0, -22); }
+                ctx.beginPath(); ctx.arc(0, -15, 4, 0, Math.PI * 2); ctx.fill();
                 ctx.restore();
             });
         }
@@ -1514,99 +1390,99 @@
 
         function drawBackground(camX) {
             const H = TOP_MARGIN;
-            const t = globalTimer;
 
-            // 1. Bầu trời (mưa thì xám)
-            const sky = ctx.createLinearGradient(0, 0, 0, H);
-            if (isRainMode) { sky.addColorStop(0, "#607D8B"); sky.addColorStop(1, "#B0BEC5"); }
-            else { sky.addColorStop(0, "#29B6F6"); sky.addColorStop(1, "#B3E5FC"); }
-            ctx.fillStyle = sky;
+            // 1. Base Green Background
+            ctx.fillStyle = "#4CAF50"; // Main Green
             ctx.fillRect(0, 0, width, H);
 
-            // 2. Mặt trời có tia xoay chậm
-            if (!isRainMode) {
-                ctx.save(); ctx.translate(58, 32); ctx.rotate(t * 0.03);
-                ctx.strokeStyle = "rgba(255, 238, 88, 0.9)"; ctx.lineWidth = 4; ctx.lineCap = "round";
-                for (let i = 0; i < 10; i++) { ctx.rotate(Math.PI / 5); ctx.beginPath(); ctx.moveTo(25, 0); ctx.lineTo(35, 0); ctx.stroke(); }
-                ctx.restore();
-                ctx.fillStyle = "#FFEE58"; ctx.strokeStyle = "#F9A825"; ctx.lineWidth = 3;
-                ctx.beginPath(); ctx.arc(58, 32, 18, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            // 2. Small lighter triangles (Distant trees/hills)
+            const smallTreeSpacing = 100;
+            const smallTreeW = 40;
+            const smallTreeH = 60;
+            const parallaxSmall = 0.3; // Move slower
+
+            let startSmall = -(camX * parallaxSmall) % smallTreeSpacing;
+            if (startSmall > 0) startSmall -= smallTreeSpacing;
+
+            ctx.fillStyle = "#81C784"; // Light Green
+            for (let x = startSmall; x < width; x += smallTreeSpacing) {
+                if (x < -smallTreeW) continue;
+                ctx.beginPath();
+                ctx.moveTo(x, H - 20); // Base Y slightly up
+                ctx.lineTo(x + smallTreeW / 2, H - 20 - smallTreeH);
+                ctx.lineTo(x + smallTreeW, H - 20);
+                ctx.fill();
             }
 
-            // 3. Mây bồng bềnh (trôi chậm + thị sai)
-            const cloudSp = 330, cOff = camX * 0.08 + t * 3, cBase = Math.floor(cOff / cloudSp);
-            for (let i = -1; i <= Math.ceil(width / cloudSp) + 1; i++) {
-                const k = cBase + i, v = ((k % 3) + 3) % 3;
-                drawToonCloud(k * cloudSp - cOff + v * 45, 20 + (v % 2) * 16, 0.75 + v * 0.15);
+            // 2.5 Ground Strip (Cushion)
+            ctx.fillStyle = "#388E3C"; // Darker Green
+            ctx.fillRect(0, H - 25, width, 25);
+
+            // Lighter edge for definition
+            ctx.fillStyle = "#66BB6A";
+            ctx.fillRect(0, H - 25, width, 5);
+
+            // 3. Big Pine Trees
+            const bigTreeSpacing = 250;
+            const parallaxBig = 0.5;
+
+            let startBig = -(camX * parallaxBig) % bigTreeSpacing;
+            if (startBig > 0) startBig -= bigTreeSpacing;
+
+            for (let x = startBig; x < width; x += bigTreeSpacing) {
+                if (x < -100) continue;
+                drawVectorTree(x + 30, H - 5); // Draw sitting on the strip
             }
 
-            // 4. Đồi xa (2 lớp)
-            drawHills(camX * 0.15, H - 34, 30, 230, isRainMode ? "#8FA5A0" : "#AED581", isRainMode ? "#6B807B" : "#7CB342");
-            drawHills(camX * 0.3 + 500, H - 20, 22, 160, isRainMode ? "#6E8F70" : "#7CCB5A", isRainMode ? "#4F6E52" : "#43A047");
-
-            // 5. Cây tròn hoạt hình
-            const treeSp = 210, tOff = camX * 0.5, tBase = Math.floor(tOff / treeSp);
-            for (let i = -1; i <= Math.ceil(width / treeSp) + 1; i++) {
-                const k = tBase + i, v = ((k % 4) + 4) % 4;
-                drawToonTree(k * treeSp - tOff + v * 30, H - 14, 0.8 + v * 0.1, v);
-            }
-
-            // 6. Dải cỏ + rào trắng mép trong đường đua
-            ctx.fillStyle = isRainMode ? "#558B2F" : "#8BC34A";
-            ctx.fillRect(0, H - 14, width, 14);
-            ctx.fillStyle = "#FFFFFF"; ctx.strokeStyle = INK; ctx.lineWidth = 2;
-            let postX = -(camX % 60); if (postX > 0) postX -= 60;
-            for (let x = postX; x < width + 60; x += 60) {
-                ctx.beginPath(); ctx.rect(x - 3, H - 24, 6, 22); ctx.fill(); ctx.stroke();
-            }
-            ctx.beginPath(); ctx.rect(-10, H - 22, width + 20, 5); ctx.fill(); ctx.stroke();
-            ctx.beginPath(); ctx.rect(-10, H - 12, width + 20, 4); ctx.fill(); ctx.stroke();
+            // 4. Blue Water Strip at Bottom - REMOVED
+            // ctx.fillStyle = "#4FC3F7"; 
+            // ctx.fillRect(0, H - 20, width, 20);
         }
 
-        // Đám mây: vẽ viền trước rồi tô đè để chỉ còn viền ngoài, nửa dưới đổ bóng nhạt
-        function drawToonCloud(x, y, sc) {
-            const puffs = [[0, 8, 13], [15, 0, 17], [34, 3, 15], [50, 9, 11], [24, 11, 13]];
-            ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc);
-            ctx.beginPath();
-            puffs.forEach(([px, py, r]) => { ctx.moveTo(px + r, py); ctx.arc(px, py, r, 0, Math.PI * 2); });
-            ctx.strokeStyle = isRainMode ? "#546E7A" : "#81D4FA"; ctx.lineWidth = 4; ctx.stroke();
-            ctx.fillStyle = isRainMode ? "#B0BEC5" : "#FFFFFF"; ctx.fill();
-            ctx.save(); ctx.beginPath(); ctx.rect(-20, 10, 90, 20); ctx.clip();
-            ctx.beginPath();
-            puffs.forEach(([px, py, r]) => { ctx.moveTo(px + r, py); ctx.arc(px, py, r, 0, Math.PI * 2); });
-            ctx.fillStyle = isRainMode ? "#90A4AE" : "#E1F5FE"; ctx.fill();
-            ctx.restore();
-            ctx.restore();
-        }
+        function drawVectorTree(x, bottomY) {
+            // Scaled down by ~0.6x to fit 120px height
+            const trunkW = 12;
+            const trunkH = 24;
 
-        // Dãy đồi lượn sóng có viền
-        function drawHills(off, baseY, amp, wave, fill, line) {
-            ctx.beginPath(); ctx.moveTo(-10, TOP_MARGIN);
-            for (let x = -10; x <= width + 20; x += 20) {
-                const u = x + off;
-                ctx.lineTo(x, baseY - amp * (0.6 + 0.3 * Math.sin(u / wave) + 0.15 * Math.sin(u / (wave * 0.37))));
-            }
-            ctx.lineTo(width + 20, TOP_MARGIN); ctx.closePath();
-            ctx.fillStyle = fill; ctx.fill();
-            ctx.strokeStyle = line; ctx.lineWidth = 3; ctx.stroke();
-        }
-
-        // Cây tròn: thân nâu + tán 3 khối, viền đậm, có điểm sáng
-        function drawToonTree(x, bottomY, sc, v) {
-            const greens = isRainMode ? ["#2E7D32", "#33691E"] : ["#43A047", "#66BB6A"];
-            ctx.save(); ctx.translate(x, bottomY); ctx.scale(sc, sc);
-            ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
-            ctx.beginPath(); ctx.ellipse(0, 0, 18, 4, 0, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = "#8D6E63"; ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
-            ctx.beginPath(); ctx.roundRect(-5, -20, 10, 21, 3); ctx.fill(); ctx.stroke();
-            const blobs = [[-11, -26, 12], [11, -27, 12], [0, -40, 15]];
+            // Shadow base
+            ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
             ctx.beginPath();
-            blobs.forEach(([bx, by, r]) => { ctx.moveTo(bx + r, by); ctx.arc(bx, by, r, 0, Math.PI * 2); });
-            ctx.lineWidth = 5; ctx.stroke();
-            ctx.fillStyle = greens[v % 2]; ctx.fill();
-            ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
-            ctx.beginPath(); ctx.ellipse(-5, -46, 5, 3, -0.5, 0, Math.PI * 2); ctx.fill();
-            ctx.restore();
+            ctx.ellipse(x, bottomY, 16, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Trunk (Extended slightly down to look planted)
+            ctx.fillStyle = "#795548"; // Brown
+            ctx.fillRect(x - trunkW / 2, bottomY - trunkH, trunkW, trunkH + 5);
+
+            // Foliage (3 Triangles)
+            ctx.fillStyle = "#2E7D32"; // Dark Green
+
+            // Bottom Tier
+            const t1W = 48; const t1H = 36;
+            let t1Y = bottomY - 18;
+            ctx.beginPath();
+            ctx.moveTo(x - t1W / 2, t1Y);
+            ctx.lineTo(x, t1Y - t1H);
+            ctx.lineTo(x + t1W / 2, t1Y);
+            ctx.fill();
+
+            // Middle Tier
+            const t2W = 36; const t2H = 30;
+            let t2Y = t1Y - 18;
+            ctx.beginPath();
+            ctx.moveTo(x - t2W / 2, t2Y);
+            ctx.lineTo(x, t2Y - t2H);
+            ctx.lineTo(x + t2W / 2, t2Y);
+            ctx.fill();
+
+            // Top Tier
+            const t3W = 24; const t3H = 24;
+            let t3Y = t2Y - 18;
+            ctx.beginPath();
+            ctx.moveTo(x - t3W / 2, t3Y);
+            ctx.lineTo(x, t3Y - t3H);
+            ctx.lineTo(x + t3W / 2, t3Y);
+            ctx.fill();
         }
 
         function startGame() {
