@@ -934,6 +934,17 @@
                         <label>THỜI GIAN KẾT THÚC (giây)</label>
                         <input type="number" id="inp-time" value="30" min="10" max="300">
                     </div>
+                    <div class="input-group">
+                        <label>SỐ NGƯỜI THẮNG</label>
+                        <select id="inp-mode" onchange="updateModeUI()">
+                            <option value="one">1 người chiến thắng</option>
+                            <option value="multi">Nhiều người cùng lúc</option>
+                        </select>
+                    </div>
+                    <div class="input-group" id="grp-winners" style="display:none">
+                        <label>SỐ NGƯỜI CHIẾN THẮNG</label>
+                        <input type="number" id="inp-winners" value="10" min="2" max="50">
+                    </div>
                 </div>
 
                 <div class="timer-display" id="timer" style="display:none">00:00.0</div>
@@ -1194,7 +1205,8 @@
         const TOP_MARGIN = 120; // Reduced height
         const START_LINE = 200;
         const FINISH_LINE = MAP_LENGTH - 600;
-        const TOP_N = 10; // Lấy N người về đích đầu tiên
+        const FINISH_JUDGE = FINISH_LINE + 50; // giữa dải caro (FINISH_LINE+10 .. +90): tâm ngựa tới đây mới tính là về đích
+        let TOP_N = 10; // Lấy N người về đích đầu tiên (đặt ở bảng điều khiển: 1 người hoặc nhiều người)
 
         // Bám đuổi: trong khoảng CATCHUP_FREE so với ngựa dẫn đầu thì chạy tự nhiên (giữ khoảng cách, không tụ lại),
         // bị bỏ xa hơn mức đó thì được tăng tốc dần để không tụt quá xa
@@ -1255,7 +1267,12 @@
             try {
                 const savedTime = localStorage.getItem('horse_v3_time');
                 if (savedTime) document.getElementById('inp-time').value = savedTime;
+                const savedMode = localStorage.getItem('horse_v3_mode');
+                if (savedMode) document.getElementById('inp-mode').value = savedMode;
+                const savedWinners = localStorage.getItem('horse_v3_winners');
+                if (savedWinners) document.getElementById('inp-winners').value = savedWinners;
             } catch (e) { }
+            updateModeUI();
             // Load Participants Count
             const storedParticipants = localStorage.getItem('lucky_draw_participants');
             if (storedParticipants) {
@@ -1274,6 +1291,11 @@
                 }
             }
         });
+
+        function updateModeUI() {
+            document.getElementById('grp-winners').style.display =
+                document.getElementById('inp-mode').value === 'multi' ? '' : 'none';
+        }
 
         function loadCurrentPrize() {
             try {
@@ -1564,9 +1586,9 @@
             if (isRacing) updateCommentary(leaderX);
 
             // Check Finish: ghi nhận thứ tự về đích, đủ TOP_N ngựa thì kết thúc
-            if (isRacing && leaderX >= FINISH_LINE) {
+            if (isRacing && leaderX >= FINISH_JUDGE) {
                 let newFinishers = ducks
-                    .filter(d => !d.finished && d.body.position.x >= FINISH_LINE)
+                    .filter(d => !d.finished && d.body.position.x >= FINISH_JUDGE)
                     .sort((a, b) => b.body.position.x - a.body.position.x);
                 newFinishers.forEach(d => {
                     d.finished = true; finishers.push(d);
@@ -1966,7 +1988,7 @@
         function updateSlowMo(leaderX, nowMs) {
             const need = 1;
             const stage = document.getElementById('gameStage');
-            if (!slowMoStart && !slowMoDone && leaderX >= FINISH_LINE - SLOWMO_ZONE && finishers.length < need) {
+            if (!slowMoStart && !slowMoDone && leaderX >= FINISH_JUDGE - SLOWMO_ZONE && finishers.length < need) {
                 slowMoStart = nowMs;
                 stage.classList.add('slowmo');
                 announce("Gay cấn quá! Các chú ngựa sắp về đích!", true);
@@ -2060,7 +2082,13 @@
             let qty = parseInt(document.getElementById('inp-qty').value);
             let time = Math.max(10, Math.min(300, parseInt(document.getElementById('inp-time').value) || 30)); // Thời gian kết thúc (giây) đặt ở bảng điều khiển
             raceTime = time; paceMult = 1; raceFrames = 0;
-            try { localStorage.setItem('horse_v3_time', time); } catch (e) { }
+            const multiMode = document.getElementById('inp-mode').value === 'multi';
+            TOP_N = multiMode ? Math.max(2, Math.min(50, parseInt(document.getElementById('inp-winners').value) || 10)) : 1;
+            try {
+                localStorage.setItem('horse_v3_time', time);
+                localStorage.setItem('horse_v3_mode', multiMode ? 'multi' : 'one');
+                localStorage.setItem('horse_v3_winners', multiMode ? TOP_N : (document.getElementById('inp-winners').value || 10));
+            } catch (e) { }
             // Calculate avg speed based on time
             let avgSpeed = (FINISH_LINE - START_LINE) / (time * 60);
             let availableHeight = height - TOP_MARGIN - 100;
@@ -2235,7 +2263,7 @@
             document.querySelector('.win-title').style.display = 'none'; // Hide generic title
 
             // 1. Title: Top N về đích
-            document.getElementById('win-name').innerText = `TOP ${topList.length} VỀ ĐÍCH`;
+            document.getElementById('win-name').innerText = topList.length === 1 ? 'NGƯỜI CHIẾN THẮNG' : `TOP ${topList.length} VỀ ĐÍCH`;
 
             // 2. ID (Hidden per request)
             // const idEl = document.getElementById('win-id');
@@ -2344,7 +2372,7 @@
                 // Ngựa đã về đích xếp trước (theo thứ tự về đích), còn lại xếp theo vị trí
                 let sorted = rankedNow;
                 let html = "";
-                for (let i = 0; i < Math.min(TOP_N, sorted.length); i++) {
+                for (let i = 0; i < Math.min(10, sorted.length); i++) {
                     let d = sorted[i];
                     let stratName = STRATEGIES[d.strategy].name;
                     let stratColor = STRATEGIES[d.strategy].color;
