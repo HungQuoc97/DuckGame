@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Duck Race: Tet Edition (V2)</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Anton&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Anton&family=Baloo+2:wght@600;800&display=swap"
         rel="stylesheet">
     <link rel="icon" href="../images.png" type="image/x-icon">
 
@@ -379,7 +379,7 @@
             position: relative;
             overflow: hidden;
             /* Water Background Style */
-            background: linear-gradient(180deg, #4FC3F7 0%, #0288D1 100%);
+            background: linear-gradient(180deg, #5CCBFA 0%, #2D9CE6 100%);
         }
 
         /* Simulated Water Surface Animation */
@@ -425,17 +425,20 @@
         /* Overlay Elements (HUD) */
         .scenario-alert {
             position: absolute;
-            top: 20px;
+            top: 56px;
             left: 50%;
             transform: translateX(-50%) scale(0);
-            background: rgba(211, 47, 47, 0.9);
-            color: var(--tet-gold);
-            padding: 10px 30px;
-            border-radius: 50px;
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 1.5rem;
-            border: 2px solid var(--tet-gold);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            background: #FF5252;
+            color: #FFF59D;
+            padding: 6px 28px;
+            border-radius: 999px;
+            font-family: 'Baloo 2', 'Roboto Condensed', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            border: 3px solid #263238;
+            box-shadow: 4px 4px 0 rgba(38, 50, 56, 0.85);
+            text-shadow: 2px 2px 0 #263238;
             transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 100;
             pointer-events: none;
@@ -444,33 +447,44 @@
 
         .rank-board {
             position: absolute;
-            top: 20px;
+            top: 96px;
+            /* nhường chỗ cho thanh tiến độ + bộ đếm phía trên */
             right: 20px;
-            width: 180px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
-            border-radius: 12px;
-            padding: 15px;
-            color: white;
-            border: 1px solid rgba(255, 215, 0, 0.3);
+            width: 190px;
+            background: #FFFDF3;
+            border-radius: 16px;
+            padding: 12px 14px;
+            color: #263238;
+            border: 3px solid #263238;
+            box-shadow: 5px 5px 0 rgba(38, 50, 56, 0.85);
+            font-family: 'Baloo 2', 'Roboto Condensed', sans-serif;
             pointer-events: none;
             z-index: 100;
         }
 
         .rank-title {
             text-align: center;
-            color: var(--tet-gold);
-            font-family: 'Roboto Condensed', sans-serif;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
+            font-weight: 800;
+            background: #FF5252;
+            color: #fff;
+            border: 2.5px solid #263238;
+            border-radius: 999px;
+            padding: 2px 0;
+            margin: -2px 0 8px;
+            letter-spacing: 1px;
+            font-size: 13px;
+            text-shadow: 1px 1px 0 #263238;
         }
 
         .rank-item {
             display: flex;
             justify-content: space-between;
-            padding: 5px 0;
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
-            font-size: 0.95rem;
+            border-bottom: 2px dashed rgba(38, 50, 56, 0.12);
+            padding: 3px 0;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.25;
         }
 
         .rank-item:last-child {
@@ -478,8 +492,58 @@
         }
 
         .rank-1 {
-            color: var(--tet-gold);
-            font-weight: bold;
+            color: #E65100;
+            font-weight: 800;
+        }
+
+        /* Đếm ngược 3-2-1 */
+        #countdown {
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-family: 'Baloo 2', 'Roboto Condensed', sans-serif;
+            font-size: 170px;
+            font-weight: 800;
+            line-height: 1;
+            color: #FFD54F;
+            white-space: nowrap;
+            text-shadow: 6px 0 0 #263238, -6px 0 0 #263238, 0 6px 0 #263238, 0 -6px 0 #263238,
+                4px 4px 0 #263238, -4px -4px 0 #263238, 4px -4px 0 #263238, -4px 4px 0 #263238,
+                0 12px 0 rgba(38, 50, 56, 0.5);
+            pointer-events: none;
+            z-index: 160;
+        }
+
+        #countdown.go {
+            font-size: 110px;
+            color: #FF5252;
+        }
+
+        #countdown.show {
+            animation: cdPop 0.85s ease-out forwards;
+        }
+
+        @keyframes cdPop {
+            0% {
+                transform: translate(-50%, -50%) scale(0.3);
+                opacity: 0;
+            }
+
+            25% {
+                transform: translate(-50%, -50%) scale(1.15);
+                opacity: 1;
+            }
+
+            70% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(0.85);
+                opacity: 0;
+            }
         }
 
         /* C. Winner Overlay (Modal) */
@@ -500,13 +564,13 @@
         }
 
         .winner-card {
-            background: linear-gradient(135deg, #ffffff, #f0f0f0);
+            background: #FFFDF3;
             padding: 20px;
             /* Reduced padding from 40px */
             border-radius: 24px;
             text-align: center;
-            border: 4px solid var(--tet-gold);
-            box-shadow: 0 0 80px rgba(255, 215, 0, 0.5);
+            border: 4px solid #263238;
+            box-shadow: 8px 8px 0 rgba(38, 50, 56, 0.85);
             animation: popUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             max-width: 1000px;
             min-height: auto;
@@ -528,12 +592,14 @@
         }
 
         .winner-title {
-            font-family: 'Roboto Condensed', sans-serif;
+            font-family: 'Baloo 2', 'Roboto Condensed', sans-serif;
+            font-weight: 800;
             font-size: 3rem;
-            color: var(--tet-red);
+            color: #FF5252;
             margin: 0;
             text-transform: uppercase;
-            text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.1);
+            text-shadow: 3px 0 0 #263238, -3px 0 0 #263238, 0 3px 0 #263238, 0 -3px 0 #263238,
+                2px 2px 0 #263238, -2px -2px 0 #263238, 2px -2px 0 #263238, -2px 2px 0 #263238;
         }
 
         /* Top 5 Grid */
@@ -592,8 +658,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            border: 2px solid transparent;
+            box-shadow: 4px 4px 0 rgba(38, 50, 56, 0.85);
+            border: 3px solid #263238;
             transition: transform 0.3s;
         }
 
@@ -871,6 +937,8 @@
                 <button class="btn-action btn-reset" onclick="showHistory()"
                     style="margin-top: 10px; border-color: var(--tet-gold); color: #b7950b;">📜 LỊCH SỬ TRÚNG
                     GIẢI</button>
+                <button class="btn-action btn-reset" id="btn-clear-cache" onclick="clearWinnersCache()"
+                    title="Xóa lịch sử trúng giải và đưa người đã trúng về lại danh sách tham gia">🧹 XÓA CACHE</button>
 
                 <a href="../index.html" class="btn-nav-bottom">
                     ⬅ QUAY VỀ MENU
@@ -885,6 +953,8 @@
             <div class="water-effect layer-2"></div>
 
             <canvas id="gameCanvas"></canvas>
+
+            <div id="countdown"></div>
 
             <div class="scenario-alert" id="scenario-alert">CHẾ ĐỘ: TỐC ĐỘ CAO</div>
 
@@ -979,7 +1049,21 @@
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const now = audioCtx.currentTime;
 
-            if (type === 'fireworks_start') {
+            if (type === 'beep') {
+                const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                o.connect(g); g.connect(audioCtx.destination);
+                o.type = 'square'; o.frequency.value = 660;
+                g.gain.setValueAtTime(0.18, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                o.start(now); o.stop(now + 0.25);
+            } else if (type === 'go') {
+                [880, 1320].forEach((f, i) => {
+                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.type = 'square'; o.frequency.value = f;
+                    g.gain.setValueAtTime(0.15, now + i * 0.12); g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.5);
+                    o.start(now + i * 0.12); o.stop(now + i * 0.12 + 0.5);
+                });
+            } else if (type === 'fireworks_start') {
                 if (fireworksInterval) clearInterval(fireworksInterval);
                 playSound('fireworks_oneshot'); // Play immediately
                 fireworksInterval = setInterval(() => {
@@ -1033,14 +1117,21 @@
         // Initial Sizing
         let width = gameStage.offsetWidth;
         let height = gameStage.offsetHeight;
-        canvas.width = width;
-        canvas.height = height;
 
-        window.addEventListener('resize', () => {
+        // Canvas có độ phân giải theo màn hình (Retina/HiDPI) để nét; toàn bộ code vẽ vẫn dùng toạ độ CSS (width x height)
+        function resizeCanvas() {
             width = gameStage.offsetWidth;
             height = gameStage.offsetHeight;
-            canvas.width = width;
-            canvas.height = height;
+            const dpr = Math.min(window.devicePixelRatio || 1, 3);
+            canvas.width = Math.round(width * dpr);
+            canvas.height = Math.round(height * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.imageSmoothingQuality = "high";
+        }
+        resizeCanvas();
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
             envCached = false;
             needsRedraw = true;
         });
@@ -1057,6 +1148,7 @@
         let ducks = [];
         let logs = []; // Obstacles
         let lotusLeaves = []; // Traps
+        let lotusFlowers = []; // Hoa sen trang trí
         let isRacing = false;
         let raceLogic = null;
         let raceDuration = 30;
@@ -1078,6 +1170,28 @@
         let envCtx = envCanvas.getContext('2d');
         let envCached = false;
 
+        // ===== PHONG CÁCH HOẠT HÌNH (ANIME) =====
+        const INK = "#263238"; // màu viền đậm kiểu hoạt hình
+        const TOON_FONT = "'Baloo 2', 'Roboto Condensed', Arial, sans-serif";
+        let rankedNow = []; // Thứ hạng của khung hình hiện tại (cho thanh tiến độ)
+        let countingDown = false;
+
+        // Hình chữ nhật bo góc có viền đậm
+        function toonRect(x, y, w, h, r, fill, lw = 2.5) {
+            ctx.fillStyle = fill; ctx.strokeStyle = INK; ctx.lineWidth = lw;
+            ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fill(); ctx.stroke();
+        }
+
+        // Chữ có viền (kiểu chữ truyện tranh)
+        function toonText(text, x, y, size, fill, stroke = INK) {
+            ctx.font = `800 ${size}px ${TOON_FONT}`;
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.lineJoin = "round"; ctx.lineWidth = Math.max(3, size / 5); ctx.strokeStyle = stroke;
+            ctx.strokeText(text, x, y);
+            ctx.fillStyle = fill; ctx.fillText(text, x, y);
+        }
+
+        const DUCK_COLOR = "#FFD93D"; // màu chấm vịt trên thanh tiến độ
         const duckImage = new Image();
         duckImage.onload = () => { needsRedraw = true; };
         duckImage.src = "../images/rubber-duck.png";
@@ -1198,6 +1312,7 @@
                     if (!d.stuckTime) d.stuckTime = 0;
                     if (!d.stunTimer) d.stunTimer = 0;
                     if (!d.collisionCooldown) d.collisionCooldown = 0; // New cooldown
+                    const stuckBefore = d.stuckTime;
 
                     // Handle Stun Timer
                     if (d.stunTimer > 0) {
@@ -1252,6 +1367,7 @@
 
                     // Collision with Lotus Leaves (Traps)
                     // Effect: "Gựng lại" -> Temporary slowdown
+                    d.inLotus = false;
                     if (d.x < FINISH_LINE) {
                         for (let leaf of lotusLeaves) {
                             let dx = d.x - leaf.x;
@@ -1259,9 +1375,13 @@
                             // Circular collision
                             if (dx * dx + dy * dy < (leaf.radius + 15) * (leaf.radius + 15)) {
                                 d.stuckTime += dt * 0.6; // 60% slowdown penalty
+                                d.inLotus = true;
                             }
                         }
                     }
+
+                    // Các hình phạt cộng dồn không được vượt quá thời gian trôi qua, nếu không vịt bị kéo lùi
+                    if (d.stuckTime - stuckBefore > dt) d.stuckTime = stuckBefore + dt;
 
                     // Calculate effective time for this duck
                     let effectiveElapsed = Math.max(0, elapsed - d.stuckTime);
@@ -1270,12 +1390,14 @@
                     let clampedDuckT = Math.min(Math.max(duckT, 0), 1);
 
                     // Re-calculate BaseX using duck-specific time
-                    let baseX = clampedDuckT * this.distance;
+                    // Không chặn ở t = 1: sau mốc thời gian vịt vẫn bơi tiếp, nếu không vịt xếp thấp bị kẹt trước vạch và dao động tới lui
+                    let baseX = Math.max(duckT, 0) * this.distance;
 
                     // Noise & Variation Logic
                     let frequency = 0.5 + (d.randomSeed % 10) / 10;
                     let amplitude = this.distance * (0.005 + (d.randomSeed % 10) / 1000);
-                    let noiseX = Math.sin(effectiveElapsed * frequency + d.randomSeed) * amplitude;
+                    // Dao động tăng dần từ 0 trong 4 giây đầu: tất cả vịt xuất phát thẳng hàng rồi mới tách nhau
+                    let noiseX = Math.sin(effectiveElapsed * frequency + d.randomSeed) * amplitude * Math.min(1, effectiveElapsed / 4);
 
                     // Rank Bias
                     let biasX = 0;
@@ -1299,6 +1421,7 @@
                     finalX = Math.max(0, finalX);
 
                     d.x = START_LINE + finalX;
+                    d.effElapsed = effectiveElapsed;
 
                     // Physics (Y-axis)
                     let bobOffset = Math.sin(effectiveElapsed * d.bobSpeed + d.bobPhase) * d.bobAmplitude;
@@ -1338,6 +1461,19 @@
         }
 
         // --- MAIN FUNCTIONS ---
+        // Vòng tròn (x, y, r) có đè lên khúc gỗ, lá sen hoặc hoa sen đã đặt không
+        function overlapsScenery(x, y, r) {
+            for (const l of logs) {
+                const ex = Math.cos(l.rotation) * l.width / 2, ey = Math.sin(l.rotation) * l.width / 2;
+                const dx = ex * 2, dy = ey * 2;
+                const t = Math.max(0, Math.min(1, ((x - (l.x - ex)) * dx + (y - (l.y - ey)) * dy) / (dx * dx + dy * dy)));
+                if (Math.hypot(x - (l.x - ex + dx * t), y - (l.y - ey + dy * t)) < r + l.height / 2 + 14) return true;
+            }
+            for (const f of lotusLeaves) if (Math.hypot(x - f.x, y - f.y) < r + f.radius + 12) return true;
+            for (const f of lotusFlowers) if (Math.hypot(x - f.x, y - f.y) < r + f.radius + 12) return true;
+            return false;
+        }
+
         function startGame() {
             // Reload prizes to ensure fresh data
             const storedPrizes = localStorage.getItem('lucky_draw_prizes');
@@ -1358,16 +1494,13 @@
                 return;
             }
 
-            if (isRacing) return;
+            if (isRacing || countingDown) return;
 
             // Auto-hide panel-inner (Controls Panel)
             document.querySelector('.controls-panel').style.display = 'none';
 
             // Update dimensions for full screen
-            width = gameStage.offsetWidth;
-            height = gameStage.offsetHeight;
-            canvas.width = width;
-            canvas.height = height;
+            resizeCanvas();
             envCached = false;
 
             // Setup Ducks
@@ -1430,14 +1563,30 @@
             // Generate Lotus Leaves (Traps)
             // They slow ducks down significantly ("gựng lại")
             lotusLeaves = [];
+            lotusFlowers = [];
             let numLotus = Math.floor(TRACK_LENGTH / 400); // 1 patch every 400px
             for (let i = 0; i < numLotus; i++) {
-                lotusLeaves.push({
-                    x: START_LINE + 200 + Math.random() * (TRACK_LENGTH - 500),
-                    y: BANK_HEIGHT + 20 + Math.random() * availableHeight,
-                    radius: 25 + Math.random() * 15, // 25-40px radius
-                    rotation: Math.random() * Math.PI * 2
-                });
+                const radius = 25 + Math.random() * 15; // 25-40px radius
+                for (let attempt = 0; attempt < 30; attempt++) {
+                    const x = START_LINE + 200 + Math.random() * (TRACK_LENGTH - 500);
+                    const y = BANK_HEIGHT + 20 + Math.random() * availableHeight;
+                    if (overlapsScenery(x, y, radius)) continue;
+                    lotusLeaves.push({ x, y, radius, rotation: Math.random() * Math.PI * 2 });
+                    break;
+                }
+            }
+
+            // Hoa sen trang trí: đặt ở chỗ trống, không đè lên lá sen hay khúc gỗ
+            let numFlowers = Math.floor(TRACK_LENGTH / 350);
+            for (let i = 0; i < numFlowers; i++) {
+                const radius = 13 + Math.random() * 5;
+                for (let attempt = 0; attempt < 30; attempt++) {
+                    const x = START_LINE + 150 + Math.random() * (TRACK_LENGTH - 300);
+                    const y = BANK_HEIGHT + 20 + Math.random() * availableHeight;
+                    if (overlapsScenery(x, y, radius)) continue;
+                    lotusFlowers.push({ x, y, radius, rotation: Math.random() * Math.PI });
+                    break;
+                }
             }
 
             // --- LOAD PARTICIPANTS ---
@@ -1521,10 +1670,75 @@
                 alertBox.style.transform = "translateX(-50%) scale(0)";
             }, 3000);
 
-            // Start Logic
-            raceLogic = new RaceLogic(raceDuration, TRACK_LENGTH, ducks);
-            raceLogic.start();
-            isRacing = true;
+            // Vịt vào vị trí xuất phát, đếm ngược 3-2-1 rồi tất cả cùng chạy
+            rankedNow = [];
+            needsRedraw = true;
+            runCountdown(() => {
+                raceLogic = new RaceLogic(raceDuration, TRACK_LENGTH, ducks);
+                raceLogic.start();
+                isRacing = true;
+            });
+        }
+
+        // Đếm ngược 3-2-1-XUẤT PHÁT!
+        function runCountdown(onGo) {
+            countingDown = true;
+            const el = document.getElementById('countdown');
+            const steps = ['3', '2', '1', 'XUẤT PHÁT!'];
+            steps.forEach((txt, i) => setTimeout(() => {
+                el.textContent = txt;
+                el.classList.toggle('go', i === steps.length - 1);
+                el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+                if (i < steps.length - 1) {
+                    playSound('beep');
+                } else {
+                    playSound('go');
+                    countingDown = false;
+                    onGo();
+                }
+            }, 700 + i * 900));
+        }
+
+        // Xóa cache kết quả: xóa lịch sử trúng giải + đưa người đã trúng về lại danh sách tham gia (danh sách quà giữ nguyên)
+        // Trả về số người được đưa về; -1 nếu bấm Hủy; -2 nếu chưa có ai trúng giải
+        function restoreWinnersToParticipants() {
+            let winners = [], participants = [];
+            try { winners = JSON.parse(localStorage.getItem('lucky_draw_winners') || '[]'); } catch (e) { }
+            try { participants = JSON.parse(localStorage.getItem('lucky_draw_participants') || '[]'); } catch (e) { }
+            if (!Array.isArray(winners)) winners = [];
+            if (!Array.isArray(participants)) participants = [];
+            if (winners.length === 0) return -2;
+            if (!confirm(`Xóa lịch sử ${winners.length} lượt trúng giải và đưa người đã trúng trở lại danh sách tham gia?\n(Danh sách quà giữ nguyên)`)) return -1;
+
+            const norm = v => String(v || '').trim();
+            const ids = new Set(participants.map(p => norm(p.id)).filter(Boolean));
+            const names = new Set(participants.map(p => norm(p.name)).filter(Boolean));
+            let restored = 0;
+            winners.forEach(w => {
+                let name = norm(w.name), id = norm(w.id);
+                // Có game lưu ngược Tên/Mã NV (giống xử lý ở trang Kết Quả): tên bắt đầu bằng YEG => đảo lại
+                if (name.toUpperCase().startsWith('YEG')) [name, id] = [id, name];
+                // Ngựa/Vịt không gắn người tham gia (VD "Ngựa 7", "Vịt #3") => bỏ qua
+                if (!id && /^(Ngựa |Vịt #)\d+$/.test(name)) return;
+                if (!name && !id) return;
+                if (id ? ids.has(id) : names.has(name)) return; // đã có trong danh sách
+                participants.push({ stt: participants.length + 1, name, id });
+                if (id) ids.add(id);
+                if (name) names.add(name);
+                restored++;
+            });
+            localStorage.setItem('lucky_draw_participants', JSON.stringify(participants));
+            localStorage.removeItem('lucky_draw_winners');
+            return restored;
+        }
+
+        function clearWinnersCache() {
+            if (isRacing || countingDown) return;
+            const restored = restoreWinnersToParticipants();
+            if (restored === -2) { alert('Chưa có lịch sử trúng giải nào để xóa.'); return; }
+            if (restored < 0) return;
+            alert(`Đã xóa cache kết quả, đưa ${restored} người về lại danh sách tham gia.`);
+            location.reload(); // cập nhật lại số vịt theo danh sách mới
         }
 
         function resetGame() {
@@ -1644,7 +1858,7 @@
             }
 
             const winnerGrid = document.getElementById('top-5-container');
-            winnerGrid.classList.toggle('compact', topWinners.length > 3);
+            winnerGrid.classList.toggle('compact', topWinners.length > 2);
             winnerGrid.innerHTML = listHtml;
 
             // Draw Avatars after HTML injection
@@ -1672,6 +1886,7 @@
             if (isRacing && raceLogic) {
                 let now = performance.now() / 1000;
                 let isFinished = raceLogic.update(now);
+                rankedNow = [...ducks].sort((a, b) => b.x - a.x);
                 updateCamera();
 
                 let elapsedMS = (now - raceLogic.startTime) * 1000;
@@ -1693,12 +1908,70 @@
             ctx.save();
             ctx.translate(-cameraX, 0);
             drawEnvironment(cameraX);
+            drawStartFinish(cameraX);
             drawLotusLeaves(); // Draw traps under ducks
+            drawLotusFlowers();
             drawLogs();
             drawDucks();
             ctx.restore();
+            drawHUD();
 
             requestAnimationFrame(loop);
+        }
+
+        // Thanh tiến độ cuộc đua (trên cùng) + bộ đếm "đã về đích / cần lấy"
+        function drawPin(cx, cy, color) {
+            ctx.fillStyle = color; ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.arc(cx, cy - 4, 9, Math.PI * 0.85, Math.PI * 2.15); ctx.lineTo(cx, cy + 12); ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            ctx.fillStyle = color === "#FFFFFF" ? "#90A4AE" : "#FFFFFF";
+            ctx.beginPath(); ctx.arc(cx, cy - 4, 3.5, 0, Math.PI * 2); ctx.fill();
+        }
+
+        function drawHUD() {
+            const x0 = 48, x1 = width - 48, y = 12, h = 18, mid = y + h / 2;
+            toonRect(x0 - 6, y - 5, x1 - x0 + 12, h + 10, 10, "#1565A8", 3);
+            const segW = (x1 - x0) / 10;
+            for (let i = 0; i < 10; i++) {
+                ctx.fillStyle = i % 2 ? "#81D4FA" : "#B3E5FC";
+                ctx.fillRect(x0 + i * segW + 1.5, y, segW - 3, h);
+            }
+            drawPin(x0 - 24, mid, "#FFFFFF");
+            drawPin(x1 + 24, mid, "#FF5252");
+
+            if (ducks.length) {
+                const px = d => x0 + (x1 - x0) * Math.max(0, Math.min(1, (d.x - START_LINE) / TRACK_LENGTH));
+                ctx.strokeStyle = INK; ctx.lineWidth = 1.5;
+                ducks.forEach(d => {
+                    ctx.fillStyle = DUCK_COLOR;
+                    ctx.beginPath(); ctx.arc(px(d), mid, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                });
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                for (let i = Math.min(3, rankedNow.length) - 1; i >= 0; i--) {
+                    const bx = px(rankedNow[i]);
+                    ctx.fillStyle = ["#FFD54F", "#E0E0E0", "#FFAB91"][i]; ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
+                    ctx.beginPath(); ctx.arc(bx, mid, 12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = INK; ctx.font = `800 14px ${TOON_FONT}`; ctx.fillText(i + 1, bx, mid + 1);
+                }
+            }
+
+            // Bộ đếm kiểu "6/16": số vịt đã qua vạch / số cần lấy (hộp ngay trên bảng xếp hạng)
+            const finishX = START_LINE + TRACK_LENGTH + 50;
+            const done = String(ducks.filter(d => d.x >= finishX).length), need = "/" + winnersNeeded;
+            const bx0 = width - 216, bw = 196, by0 = 44, bh = 46;
+            ctx.fillStyle = "rgba(33, 33, 33, 0.9)"; ctx.strokeStyle = "rgba(255, 255, 255, 0.85)"; ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.roundRect(bx0, by0, bw, bh, 14); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = "#FFFFFF"; ctx.font = `800 15px ${TOON_FONT}`;
+            ctx.textAlign = "left"; ctx.textBaseline = "middle";
+            ctx.fillText("🏁 VỀ ĐÍCH", bx0 + 14, by0 + bh / 2 + 1);
+            ctx.textBaseline = "alphabetic"; ctx.lineJoin = "round";
+            ctx.font = `800 24px ${TOON_FONT}`; const wNeed = ctx.measureText(need).width;
+            ctx.font = `800 36px ${TOON_FONT}`; const wDone = ctx.measureText(done).width;
+            const rx = bx0 + bw - 14, by = by0 + bh - 9;
+            ctx.lineWidth = 5; ctx.strokeStyle = INK;
+            ctx.strokeText(done, rx - wNeed - wDone, by); ctx.fillStyle = "#FF9800"; ctx.fillText(done, rx - wNeed - wDone, by);
+            ctx.font = `800 24px ${TOON_FONT}`; ctx.lineWidth = 4;
+            ctx.strokeText(need, rx - wNeed, by); ctx.fillStyle = "#FFFFFF"; ctx.fillText(need, rx - wNeed, by);
         }
 
         function updateCamera() {
@@ -1720,6 +1993,7 @@
 
         function updateRankUI() {
             let sorted = [...ducks].sort((a, b) => b.x - a.x);
+            sorted.forEach((d, i) => { d.place = i + 1; });
             let html = "";
 
             for (let i = 0; i < Math.min(5, sorted.length); i++) {
@@ -1730,108 +2004,151 @@
         }
 
         function drawEnvironment(camX) {
-            // Draw River Bank (Top)
+            const H = BANK_HEIGHT;
             const viewX = Math.floor(camX) - 1, viewW = width + 2;
-            ctx.fillStyle = "#4CAF50"; // Green grass
-            ctx.fillRect(viewX, 0, viewW, BANK_HEIGHT);
 
-            // Bank Border
-            ctx.fillStyle = "#388E3C";
-            ctx.fillRect(viewX, BANK_HEIGHT - 10, viewW, 10);
-
-            // Simple Grass Tufts on Bank
-            ctx.fillStyle = "#81C784";
+            // 1. Dải trời + hàng bụi cây xa (cuộn chậm hơn để có chiều sâu)
+            ctx.fillStyle = "#CDEEFF";
+            ctx.fillRect(viewX, 0, viewW, 40);
+            ctx.fillStyle = "#35BE9E";
             ctx.beginPath();
-            for (let i = Math.max(0, Math.floor((camX - 100) / 100) * 100); i < MAP_LENGTH && i - camX < width + 100; i += 100) {
-                if (i - camX > -100) {
-                    ctx.moveTo(i, BANK_HEIGHT - 10);
-                    ctx.lineTo(i + 10, BANK_HEIGHT - 30);
-                    ctx.lineTo(i + 20, BANK_HEIGHT - 10);
-                    ctx.closePath();
-                }
+            for (let x = Math.floor((camX * 0.7 - 60) / 70) * 70; x < camX * 0.7 + width + 60; x += 70) {
+                const cx = x + camX * 0.3;
+                ctx.moveTo(cx + 34, 62); ctx.arc(cx, 62, 34, 0, Math.PI, true);
+            }
+            ctx.fill();
+            ctx.fillStyle = "#21A587";
+            ctx.fillRect(viewX, 56, viewW, 24);
+
+            // 2. Cỏ sọc thẳng trên bờ
+            ctx.fillStyle = "#6CC85A";
+            ctx.fillRect(viewX, 74, viewW, H - 74);
+            ctx.fillStyle = "#5DBB4C";
+            ctx.beginPath();
+            for (let x = Math.floor(camX / 180) * 180; x < camX + width; x += 180) ctx.rect(x, 74, 90, H - 74);
+            ctx.fill();
+
+            // 3. Khóm cỏ nhỏ
+            ctx.strokeStyle = "rgba(46, 125, 50, 0.45)";
+            ctx.lineWidth = 2; ctx.lineCap = "round";
+            ctx.beginPath();
+            for (let gx = Math.floor(camX / 90) * 90; gx < camX + width + 90; gx += 90) {
+                const hh = Math.abs(Math.sin(gx * 12.9898) * 43758.5453) % 1;
+                const tx = gx + hh * 70, ty = 96 + hh * 14;
+                ctx.moveTo(tx - 5, ty - 6); ctx.lineTo(tx - 2, ty);
+                ctx.moveTo(tx, ty - 9); ctx.lineTo(tx, ty);
+                ctx.moveTo(tx + 5, ty - 6); ctx.lineTo(tx + 2, ty);
+            }
+            ctx.stroke();
+
+            // 4. Cây tròn viền đậm trên bờ
+            ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.lineJoin = "round";
+            for (let i = 50 + Math.max(0, Math.floor((camX - 300) / 200)) * 200; i < MAP_LENGTH && i - camX < width + 200; i += 200) {
+                if (i - camX <= -200) continue;
+                ctx.fillStyle = "#A1887F";
+                ctx.beginPath(); ctx.roundRect(i - 6, H - 52, 12, 44, 3); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = "#43B44F";
+                ctx.beginPath(); ctx.arc(i, H - 76, 26, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(i - 20, H - 60, 17, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(i + 20, H - 60, 17, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = "#43B44F";
+                ctx.beginPath(); ctx.arc(i, H - 70, 24, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = "#7BD66A";
+                ctx.beginPath(); ctx.arc(i - 8, H - 82, 10, 0, Math.PI * 2); ctx.fill();
+            }
+
+            // 5. Mép bờ: viền đậm + bọt nước trắng
+            ctx.fillStyle = "#4BA83C";
+            ctx.fillRect(viewX, H - 12, viewW, 12);
+            ctx.strokeStyle = INK; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(viewX, H); ctx.lineTo(viewX + viewW, H); ctx.stroke();
+            ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+            ctx.beginPath();
+            for (let x = Math.floor(camX / 34) * 34; x < camX + width + 34; x += 34) {
+                ctx.moveTo(x + 9, H + 6); ctx.arc(x, H + 6, 9, 0, Math.PI * 2);
             }
             ctx.fill();
 
-            // Draw Finish Line (Checkered Pattern)
-            // Use START_LINE + Race Logic Distance (10000)
-            let logicalFinishX = FINISH_LINE;
-
-            if (logicalFinishX - camX > -100 && logicalFinishX - camX < width + 100) {
-                let finishX = logicalFinishX;
-                let checkerSize = 20;
-
-                // Draw Vertical Post (Left)
-                ctx.fillStyle = "#3E2723";
-                ctx.fillRect(finishX, BANK_HEIGHT, 10, height - BANK_HEIGHT);
-
-                // Draw Checkered Strip
-                for (let y = BANK_HEIGHT; y < height; y += checkerSize) {
-                    // Column 1
-                    ctx.fillStyle = (Math.floor((y - BANK_HEIGHT) / checkerSize) % 2 === 0) ? "#FFFFFF" : "#000000";
-                    ctx.fillRect(finishX + 10, y, checkerSize, checkerSize);
-
-                    // Column 2
-                    ctx.fillStyle = (Math.floor((y - BANK_HEIGHT) / checkerSize) % 2 === 0) ? "#000000" : "#FFFFFF";
-                    ctx.fillRect(finishX + 10 + checkerSize, y, checkerSize, checkerSize);
-                }
-
-                // Draw Vertical Post (Right)
-                ctx.fillStyle = "#3E2723";
-                ctx.fillRect(finishX + 10 + checkerSize * 2, BANK_HEIGHT, 10, height - BANK_HEIGHT);
-
-                // Overhead Banner
-                ctx.fillStyle = "#D32F2F";
-                ctx.fillRect(finishX, BANK_HEIGHT - 60, 60 + checkerSize * 2, 40);
-
-                ctx.fillStyle = "#FFD700";
-                ctx.font = "bold 16px Arial";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                // ctx.fillText("RACING GOAL", finishX + 30 + checkerSize, BANK_HEIGHT - 40);
-            }
-
-            // Draw Checkpoints / Distance Markers (Existing)
-            for (let i = 0; i <= MAP_LENGTH; i += 2000) {
-                if (i - camX > -100 && i - camX < width + 100) {
-                    ctx.fillStyle = "rgba(255,255,255,0.3)";
-                    ctx.fillRect(i, BANK_HEIGHT, 2, height);
-                    ctx.fillStyle = "#fff";
-                    ctx.font = "12px Arial";
-                    ctx.fillText(i + "m", i + 5, BANK_HEIGHT + 20);
+            // 6. Gợn sóng trên mặt nước
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"; ctx.lineWidth = 2.5; ctx.lineCap = "round";
+            ctx.beginPath();
+            for (let gx = Math.floor(camX / 150) * 150; gx < camX + width + 150; gx += 150) {
+                for (let gy = H + 50; gy < height; gy += 80) {
+                    const hh = Math.abs(Math.sin(gx * 12.9898 + gy * 78.233) * 43758.5453) % 1;
+                    const tx = gx + hh * 120, ty = gy + hh * 40;
+                    ctx.moveTo(tx - 15, ty); ctx.quadraticCurveTo(tx - 7, ty - 6, tx, ty); ctx.quadraticCurveTo(tx + 7, ty + 6, tx + 15, ty);
                 }
             }
+            ctx.stroke();
 
-            // Draw Trees on Bank
-            for (let i = 50 + Math.max(0, Math.floor((camX - 300) / 200)) * 200; i < MAP_LENGTH && i - camX < width + 200; i += 200) {
-                if (i - camX > -200) {
-                    let treeX = i;
-                    let treeY = BANK_HEIGHT - 40;
+            // 7. Cột mốc khoảng cách (mỗi 100m tính từ vạch xuất phát)
+            for (let k = 1; k * 1000 < TRACK_LENGTH; k++) {
+                const x = START_LINE + k * 1000;
+                if (x - camX < -100 || x - camX > width + 100) continue;
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.45)"; ctx.lineWidth = 3; ctx.setLineDash([14, 12]);
+                ctx.beginPath(); ctx.moveTo(x, H + 28); ctx.lineTo(x, height); ctx.stroke();
+                ctx.setLineDash([]);
+                toonRect(x - 30, H + 12, 60, 26, 13, "#FFF59D");
+                ctx.fillStyle = INK; ctx.font = `800 15px ${TOON_FONT}`;
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText(k * 100 + "m", x, H + 26);
+            }
+        }
 
-                    // Trunk
-                    ctx.fillStyle = "#795548";
-                    ctx.fillRect(treeX - 10, treeY, 20, 40);
+        // Cổng xuất phát / về đích: dải caro, hai cột sọc đỏ trắng viền đậm và biển tên phía trên bờ
+        function drawGate(x, stripW, label, bannerColor, textColor) {
+            const cell = stripW / 2, poleW = 10;
+            const signTop = BANK_HEIGHT - 84, signH = 34;
+            const cx = x + stripW / 2;
 
-                    // Leaves (3 layers)
-                    ctx.fillStyle = "#2E7D32";
-                    ctx.beginPath();
-                    ctx.moveTo(treeX - 40, treeY);
-                    ctx.lineTo(treeX, treeY - 60);
-                    ctx.lineTo(treeX + 40, treeY);
-                    ctx.fill();
+            // Dải caro vắt ngang sông
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(x, BANK_HEIGHT, stripW, height - BANK_HEIGHT);
+            ctx.fillStyle = INK;
+            ctx.beginPath();
+            for (let r = 0, y = BANK_HEIGHT; y < height; r++, y += cell) {
+                ctx.rect(r % 2 === 0 ? x + cell : x, y, cell, Math.min(cell, height - y));
+            }
+            ctx.fill();
+            ctx.strokeStyle = INK; ctx.lineWidth = 3;
+            ctx.strokeRect(x, BANK_HEIGHT, stripW, height - BANK_HEIGHT);
 
-                    ctx.fillStyle = "#388E3C";
-                    ctx.beginPath();
-                    ctx.moveTo(treeX - 35, treeY - 30);
-                    ctx.lineTo(treeX, treeY - 80);
-                    ctx.lineTo(treeX + 35, treeY - 30);
-                    ctx.fill();
+            // Hai cột sọc đỏ trắng, cao lên khỏi bờ để treo biển
+            for (const px of [x - poleW, x + stripW]) {
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillRect(px, signTop, poleW, height - signTop);
+                ctx.fillStyle = "#FF5252";
+                ctx.beginPath();
+                for (let y = signTop; y < height; y += 24) ctx.rect(px, y, poleW, Math.min(12, height - y));
+                ctx.fill();
+                ctx.strokeStyle = INK; ctx.lineWidth = 3;
+                ctx.strokeRect(px, signTop, poleW, height - signTop);
+            }
 
-                    ctx.fillStyle = "#43A047";
-                    ctx.beginPath();
-                    ctx.moveTo(treeX - 30, treeY - 60);
-                    ctx.lineTo(treeX, treeY - 100);
-                    ctx.lineTo(treeX + 30, treeY - 60);
-                    ctx.fill();
+            // Biển tên kiểu truyện tranh
+            const signW = Math.max(100, stripW + poleW * 2 + 12);
+            toonRect(cx - signW / 2, signTop, signW, signH, 12, bannerColor, 3);
+            toonText(label, cx, signTop + signH / 2 + 1, 19, textColor);
+        }
+
+        function drawStartFinish(camX) {
+            const startX = START_LINE + 28; // sát mũi vịt khi đứng ở vạch xuất phát
+            if (startX - camX > -150 && startX - camX < width + 150) {
+                drawGate(startX, 16, "START", "#4FC3F7", "#FFFFFF");
+            }
+            const finishX = FINISH_LINE + 10;
+            if (finishX - camX > -150 && finishX - camX < width + 150) {
+                drawGate(finishX, 40, "FINISH", "#FF5252", "#FFEB3B");
+                // Dây cờ đuôi nheo trên cổng đích
+                const flagColors = ["#FFD54F", "#4FC3F7", "#FF8A80", "#AED581"];
+                const y0 = BANK_HEIGHT - 44;
+                ctx.strokeStyle = INK; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(finishX - 10, y0); ctx.lineTo(finishX + 50, y0); ctx.stroke();
+                for (let i = 0; i < 4; i++) {
+                    const fx = finishX - 6 + i * 14;
+                    ctx.fillStyle = flagColors[i];
+                    ctx.beginPath(); ctx.moveTo(fx, y0); ctx.lineTo(fx + 12, y0); ctx.lineTo(fx + 6, y0 + 13); ctx.closePath();
+                    ctx.fill(); ctx.stroke();
                 }
             }
         }
@@ -1846,57 +2163,42 @@
                     const rw = log.width / 2;
                     const rh = log.height / 2;
 
-                    // 1. Shadows
-                    ctx.fillStyle = "rgba(0,0,0,0.3)";
-                    ctx.beginPath();
-                    ctx.ellipse(0, 5, rw, rh, 0, 0, Math.PI * 2);
-                    ctx.fill();
+                    // Bóng + vòng nước quanh khúc gỗ
+                    ctx.fillStyle = "rgba(0, 40, 90, 0.2)";
+                    ctx.beginPath(); ctx.ellipse(0, 6, rw + 3, rh + 2, 0, 0, Math.PI * 2); ctx.fill();
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.6)"; ctx.lineWidth = 2.5;
+                    ctx.beginPath(); ctx.ellipse(0, 3, rw + 9, rh + 7, 0, 0, Math.PI * 2); ctx.stroke();
 
-                    // 2. Main Log Body (Cylinder Gradient)
-                    let grad = ctx.createLinearGradient(0, -rh, 0, rh);
-                    grad.addColorStop(0, "#8D6E63"); // Light Brown
-                    grad.addColorStop(0.5, "#5D4037"); // Medium Brown
-                    grad.addColorStop(1, "#3E2723"); // Dark Brown
-                    ctx.fillStyle = grad;
+                    // Thân gỗ
+                    ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.fillStyle = "#B08968";
+                    ctx.beginPath(); ctx.roundRect(-rw, -rh, rw * 2, rh * 2, rh * 0.8); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = "rgba(255, 224, 178, 0.45)"; // vệt sáng trên thân
+                    ctx.beginPath(); ctx.roundRect(-rw + 8, -rh + 3, rw * 2 - 16, 5, 2.5); ctx.fill();
 
-                    // Rounded Rect path manually for compatibility
-                    ctx.beginPath();
-                    ctx.moveTo(-rw + 5, -rh);
-                    ctx.lineTo(rw - 5, -rh);
-                    ctx.quadraticCurveTo(rw, -rh, rw, 0);
-                    ctx.quadraticCurveTo(rw, rh, rw - 5, rh);
-                    ctx.lineTo(-rw + 5, rh);
-                    ctx.quadraticCurveTo(-rw, rh, -rw, 0);
-                    ctx.quadraticCurveTo(-rw, -rh, -rw + 5, -rh);
-                    ctx.fill();
-
-                    // 3. Wood Grain / Texture
-                    ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                    ctx.lineWidth = 2;
+                    // Vân gỗ cố định
+                    ctx.strokeStyle = "#7B5236"; ctx.lineWidth = 2; ctx.lineCap = "round";
                     ctx.beginPath();
                     for (const g of log.grain) {
-                        let yOff = g[0] * rh * 1.5;
-                        ctx.moveTo(-rw + 10, yOff);
-                        ctx.lineTo(rw - 10, yOff + g[1] * 5);
+                        const yOff = g[0] * rh * 1.2 + 2;
+                        ctx.moveTo(-rw + 14, yOff);
+                        ctx.lineTo(rw - 14, yOff + g[1] * 4);
                     }
                     ctx.stroke();
 
-                    // 4. Cut Ends
-                    ctx.fillStyle = "#A1887F";
-                    ctx.beginPath();
-                    ctx.ellipse(-rw + 5, 0, 3, rh - 2, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.ellipse(rw - 5, 0, 3, rh - 2, 0, 0, Math.PI * 2);
-                    ctx.fill();
+                    // Hai đầu gỗ có vòng tuổi
+                    ctx.lineWidth = 2.5; ctx.strokeStyle = INK; ctx.fillStyle = "#FFE0B2";
+                    for (const ex of [-rw + 6, rw - 6]) {
+                        ctx.beginPath(); ctx.ellipse(ex, 0, 5, rh - 3, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                        ctx.strokeStyle = "#BCAAA4"; ctx.lineWidth = 1.5;
+                        ctx.beginPath(); ctx.ellipse(ex, 0, 2, (rh - 3) * 0.5, 0, 0, Math.PI * 2); ctx.stroke();
+                        ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
+                    }
 
-                    // 5. Moss patches
+                    // Rêu
                     if (log.moss) {
-                        ctx.fillStyle = "#558B2F"; // Moss Green
-                        ctx.beginPath();
-                        ctx.arc(-rw * 0.3, -5, 6, 0, Math.PI * 2);
-                        ctx.arc(-rw * 0.3 + 8, -5, 4, 0, Math.PI * 2);
-                        ctx.fill();
+                        ctx.fillStyle = "#7CB342"; ctx.strokeStyle = INK; ctx.lineWidth = 2;
+                        ctx.beginPath(); ctx.arc(-rw * 0.3, -rh + 2, 7, Math.PI, 0); ctx.arc(-rw * 0.3 + 11, -rh + 3, 5, Math.PI, 0);
+                        ctx.fill(); ctx.stroke();
                     }
 
                     ctx.restore();
@@ -1911,33 +2213,83 @@
                     ctx.translate(leaf.x, leaf.y);
                     ctx.rotate(leaf.rotation);
 
-                    // Leaf Body (Pacman shape)
-                    ctx.fillStyle = "#4caf50"; // Base Green
+                    // Lá sen (hình khuyết) viền đậm
+                    ctx.fillStyle = "#7ED957"; ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.lineJoin = "round";
                     ctx.beginPath();
-                    ctx.arc(0, 0, leaf.radius, 0.2, Math.PI * 2 - 0.2); // Cutout slice
+                    ctx.arc(0, 0, leaf.radius, 0.2, Math.PI * 2 - 0.2);
                     ctx.lineTo(0, 0);
-                    ctx.fill();
+                    ctx.closePath();
+                    ctx.fill(); ctx.stroke();
 
-                    // Veins
-                    ctx.strokeStyle = "#81c784"; // Lighter Green
-                    ctx.lineWidth = 2;
-                    for (let i = 0; i < 5; i++) {
-                        let angle = (Math.PI * 2 * i) / 5;
-                        ctx.beginPath();
-                        ctx.moveTo(0, 0);
-                        ctx.lineTo(Math.cos(angle) * (leaf.radius - 2), Math.sin(angle) * (leaf.radius - 2));
-                        ctx.stroke();
-                    }
-
-                    // Darker center
-                    ctx.fillStyle = "#388e3c";
+                    // Gân lá
+                    ctx.strokeStyle = "#B7F0A0"; ctx.lineWidth = 2; ctx.lineCap = "round";
                     ctx.beginPath();
-                    ctx.arc(0, 0, 3, 0, Math.PI * 2);
-                    ctx.fill();
+                    for (let i = 0; i < 5; i++) {
+                        const angle = 0.5 + (Math.PI * 2 - 1) * i / 4;
+                        ctx.moveTo(0, 0);
+                        ctx.lineTo(Math.cos(angle) * (leaf.radius - 5), Math.sin(angle) * (leaf.radius - 5));
+                    }
+                    ctx.stroke();
 
                     ctx.restore();
                 }
             });
+        }
+
+        // Hoa sen nổi riêng trên mặt nước (không nằm đè lên lá sen hay khúc gỗ)
+        function drawLotusFlowers() {
+            lotusFlowers.forEach(f => {
+                if (f.x - cameraX > -60 && f.x - cameraX < width + 60) {
+                    ctx.save();
+                    ctx.translate(f.x, f.y);
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.6)"; ctx.lineWidth = 2.5;
+                    ctx.beginPath(); ctx.ellipse(0, 4, f.radius + 6, f.radius * 0.55 + 4, 0, 0, Math.PI * 2); ctx.stroke();
+                    ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.lineJoin = "round";
+                    ctx.fillStyle = "#FF8FB1";
+                    for (let i = 0; i < 6; i++) {
+                        const a = (Math.PI * 2 * i) / 6 + f.rotation;
+                        ctx.save();
+                        ctx.rotate(a);
+                        ctx.beginPath(); ctx.ellipse(f.radius * 0.5, 0, f.radius * 0.55, f.radius * 0.3, 0, 0, Math.PI * 2);
+                        ctx.fill(); ctx.stroke();
+                        ctx.restore();
+                    }
+                    ctx.fillStyle = "#FFEB3B";
+                    ctx.beginPath(); ctx.arc(0, 0, f.radius * 0.3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                    ctx.restore();
+                }
+            });
+        }
+
+        // Emoji được vẽ sẵn thành ảnh nhỏ một lần rồi dùng lại, tránh vẽ chữ emoji mỗi khung hình
+        const emojiCache = {};
+        function emojiSprite(ch, px) {
+            const key = ch + px;
+            let c = emojiCache[key];
+            if (!c) {
+                c = emojiCache[key] = document.createElement('canvas');
+                c.width = c.height = px * 2;
+                const g = c.getContext('2d');
+                g.scale(2, 2);
+                g.font = `${px * 0.85}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+                g.textAlign = "center";
+                g.textBaseline = "middle";
+                g.fillText(ch, px / 2, px / 2 + 1);
+            }
+            return c;
+        }
+
+        function duckEmotion(d) {
+            if (!isRacing) return d.x >= START_LINE + TRACK_LENGTH + 50 ? '🥳' : null;
+            if (d.stunTimer > 0) return '💫';
+            if (d.inLotus) return '😰';
+            if (d.startBoost && d.effElapsed < d.boostDuration) return '🔥';
+            // Dẫn đầu / bét bảng chỉ có ý nghĩa khi cuộc đua đã đi được một đoạn
+            const progress = raceLogic ? (raceLogic.leaderX - START_LINE) / TRACK_LENGTH : 0;
+            if (progress < 0.15 || ducks.length < 2) return null;
+            if (d.place === 1) return '😎';
+            if (d.place === ducks.length) return '😢';
+            return null;
         }
 
         const WAKE_COLORS = Array.from({ length: 10 }, (_, i) => `rgba(220, 245, 255, ${0.7 - (i * 0.07)})`);
@@ -1988,23 +2340,33 @@
                         ctx.fill();
                     }
 
-                    // 5. Hat - REMOVED
+                    // 5. Bong bóng biểu cảm phía sau đầu vịt: chỉ hiện khi vịt đang ở tình huống đặc biệt
+                    const emotion = duckEmotion(d);
+                    if (emotion) {
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+                        ctx.strokeStyle = "rgba(0, 0, 0, 0.25)";
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        ctx.arc(-18, -34, 12, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                        ctx.drawImage(emojiSprite(emotion, 16), -26, -42, 16, 16);
+                    }
 
                     // 6. ID Tag
                     // Show MSNV if available, otherwise just ID
                     let displayText = d.msnv || d.id;
 
                     // Adjust box size based on text length
-                    ctx.font = "bold 10px Arial";
-                    if (d.labelW === undefined) d.labelW = Math.max(15, ctx.measureText(displayText).width + 6);
+                    ctx.font = `800 11px ${TOON_FONT}`;
+                    if (d.labelW === undefined) d.labelW = Math.max(22, ctx.measureText(displayText).width + 14);
                     let boxWidth = d.labelW;
 
-                    ctx.fillStyle = "white";
-                    ctx.fillRect(-30 - boxWidth / 2, -5, boxWidth, 12);
-                    ctx.fillStyle = "black";
+                    toonRect(-34 - boxWidth / 2, -8, boxWidth, 16, 8, "#FFFFFF", 2);
+                    ctx.fillStyle = INK;
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
-                    ctx.fillText(displayText, -30, 1);
+                    ctx.fillText(displayText, -34, 1);
 
                     // 7. Stun Effect (Spinning Stars)
                     if (d.stunTimer && d.stunTimer > 0) {
@@ -2046,8 +2408,6 @@
 
             // Body (Image)
             if (duckImage.complete) {
-                // Determine source dimensions to crop if needed, or just draw
-                // Assuming square image
                 cx.drawImage(duckImage, -25, -25, 50, 50);
             } else {
                 cx.fillStyle = "#ffeb3b";
