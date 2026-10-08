@@ -552,6 +552,36 @@
             padding-bottom: 20px;
         }
 
+        .top-5-container.compact {
+            max-height: 62vh;
+            overflow-y: auto;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .top-5-container.compact .winner-box {
+            width: 190px;
+            padding: 10px;
+        }
+
+        .top-5-container.compact .winner-box canvas {
+            width: 130px;
+            height: 130px;
+        }
+
+        .top-5-container.compact .winner-box .w-prize-tag {
+            font-size: 1rem !important;
+        }
+
+        .top-5-container.compact .winner-box .w-name-tag {
+            font-size: 1.2rem !important;
+        }
+
+        .top-5-container.compact .winner-box .w-id-tag {
+            font-size: 0.95rem !important;
+            padding: 3px 10px !important;
+        }
+
         .winner-box {
             background: rgba(255, 255, 255, 0.8);
             border-radius: 15px;
@@ -817,6 +847,17 @@
                         <label>SỐ VỊT</label>
                         <input type="number" id="inp-qty" value="30" min="2" max="500">
                     </div>
+                    <div class="input-group">
+                        <label>SỐ NGƯỜI THẮNG</label>
+                        <select id="inp-mode" onchange="updateModeUI()">
+                            <option value="one">1 người chiến thắng</option>
+                            <option value="multi">Nhiều người cùng lúc</option>
+                        </select>
+                    </div>
+                    <div class="input-group" id="grp-winners" style="display:none">
+                        <label>SỐ NGƯỜI CHIẾN THẮNG</label>
+                        <input type="number" id="inp-winners" value="5" min="2" max="50">
+                    </div>
                     <div class="input-group" style="display:none">
                         <label>THỜI GIAN (s)</label>
                         <input type="number" id="inp-time" value="30" disabled>
@@ -1001,6 +1042,7 @@
             canvas.width = width;
             canvas.height = height;
             envCached = false;
+            needsRedraw = true;
         });
 
         // --- GAME CONFIG ---
@@ -1019,10 +1061,13 @@
         let raceLogic = null;
         let raceDuration = 30;
         let winnerId = -1;
+        let winnersNeeded = 1; // Số vịt về đích đầu tiên được tính là người thắng
         let cameraX = 0;
         let globalTimer = 0;
         let lastRankUpdate = 0; // Throttle rank updates
         const timerElement = document.getElementById('timer'); // Cache element
+        let lastTimerText = "";
+        let needsRedraw = true; // Khi không đua thì khung hình đứng yên, chỉ vẽ lại khi cần
 
         // Prize System
         let prizes = [];
@@ -1034,11 +1079,24 @@
         let envCached = false;
 
         const duckImage = new Image();
+        duckImage.onload = () => { needsRedraw = true; };
         duckImage.src = "../images/rubber-duck.png";
 
         // --- INITIALIZATION ---
+        function updateModeUI() {
+            document.getElementById('grp-winners').style.display =
+                document.getElementById('inp-mode').value === 'multi' ? '' : 'none';
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             loadPrizesAndPopulateDropdown();
+            try {
+                const savedMode = localStorage.getItem('duck_v2_mode');
+                if (savedMode) document.getElementById('inp-mode').value = savedMode;
+                const savedWinners = localStorage.getItem('duck_v2_winners');
+                if (savedWinners) document.getElementById('inp-winners').value = savedWinners;
+            } catch (e) { }
+            updateModeUI();
             // Load Participants Count
             const storedParticipants = localStorage.getItem('lucky_draw_participants');
             if (storedParticipants) {
@@ -1265,8 +1323,17 @@
                 });
 
                 // Finish when leading duck crosses the finish line width (visually past it)
-                let leaderX = Math.max(...this.ducks.map(d => d.x));
-                return leaderX >= (START_LINE + this.distance + 50); // +50 for visual clearance
+                let leaderX = 0;
+                for (const d of this.ducks) if (d.x > leaderX) leaderX = d.x;
+                this.leaderX = leaderX;
+                const finishX = START_LINE + this.distance + 50; // +50 for visual clearance
+                if (winnersNeeded <= 1) return leaderX >= finishX;
+                if (leaderX < finishX) return false;
+                // Nhiều người thắng: kết thúc khi đủ N vịt đã qua vạch (dự phòng: quá giờ 15 giây)
+                if (elapsed > this.duration + 15) return true;
+                let crossed = 0;
+                for (const d of this.ducks) if (d.x >= finishX) crossed++;
+                return crossed >= winnersNeeded;
             }
         }
 
@@ -1310,6 +1377,14 @@
             if (isNaN(qty) || qty < 2) qty = 30;
             console.log("Starting race with QTY:", qty);
 
+            const multiMode = document.getElementById('inp-mode').value === 'multi';
+            const winnersInput = document.getElementById('inp-winners').value;
+            winnersNeeded = multiMode ? Math.max(2, Math.min(50, parseInt(winnersInput) || 5)) : 1;
+            try {
+                localStorage.setItem('duck_v2_mode', multiMode ? 'multi' : 'one');
+                localStorage.setItem('duck_v2_winners', multiMode ? winnersNeeded : (winnersInput || 5));
+            } catch (e) { }
+
             raceDuration = 30; // Hardcoded 30s as requested
             winnerId = Math.floor(Math.random() * qty) + 1;
 
@@ -1347,7 +1422,8 @@
                     width: 120 + Math.random() * 80, // Much longer: 120-200px
                     height: 24, // Fixed thickness for cylinder look
                     rotation: Math.PI / 2 + (Math.random() - 0.5) * 0.4, // Rotate ~90 degrees to lie across the river
-                    moss: Math.random() > 0.5 // 50% chance of moss
+                    moss: Math.random() > 0.5, // 50% chance of moss
+                    grain: Array.from({ length: 3 }, () => [Math.random() - 0.5, Math.random() - 0.5]) // vân gỗ cố định
                 });
             }
 
@@ -1403,6 +1479,8 @@
 
                 } catch (e) { console.error(e); }
             }
+
+            winnersNeeded = Math.min(winnersNeeded, qty);
 
             for (let i = 0; i < qty; i++) {
                 let p = participants[i] || {};
@@ -1460,7 +1538,7 @@
 
             // Find Top 1
             let sortedDucks = [...ducks].sort((a, b) => b.x - a.x); // Sort by position (Visual Winner)
-            let topWinners = sortedDucks.slice(0, 1);
+            let topWinners = sortedDucks.slice(0, winnersNeeded);
 
             // UI Update
             document.getElementById('winner-screen').style.display = 'flex';
@@ -1474,8 +1552,8 @@
                 prizeName = p.name;
                 prizeItem = p.item;
 
-                // Determine how many prizes we can give (max 1, or limited by quantity)
-                prizesToAward = Math.min(1, p.quantity);
+                // Tất cả người thắng cùng nhận giải đang chọn
+                prizesToAward = topWinners.length;
 
                 // Deduct quantity
                 // prizes[currentPrizeIndex].quantity -= prizesToAward;
@@ -1486,6 +1564,7 @@
             // Render Winner Grid
             let listHtml = "";
             let winnersHistory = JSON.parse(localStorage.getItem('lucky_draw_winners') || '[]');
+            const savedAt = Date.now();
 
             topWinners.forEach((d, index) => {
                 let rank = index + 1;
@@ -1521,7 +1600,7 @@
                         id: d.msnv || "",
                         prize: prizeName,
                         prizeItem: prizeItem,
-                        timestamp: Date.now(),
+                        timestamp: savedAt,
                         gameType: "Đua Vịt Tet V2"
                     });
                 }
@@ -1564,7 +1643,9 @@
                 console.error("Error removing winner from list:", e);
             }
 
-            document.getElementById('top-5-container').innerHTML = listHtml;
+            const winnerGrid = document.getElementById('top-5-container');
+            winnerGrid.classList.toggle('compact', topWinners.length > 3);
+            winnerGrid.innerHTML = listHtml;
 
             // Draw Avatars after HTML injection
             topWinners.forEach(d => {
@@ -1584,6 +1665,8 @@
 
         // --- RENDERING ---
         function loop() {
+            if (!isRacing && !needsRedraw) { requestAnimationFrame(loop); return; }
+            needsRedraw = false;
             globalTimer += 0.05;
 
             if (isRacing && raceLogic) {
@@ -1619,7 +1702,7 @@
         }
 
         function updateCamera() {
-            let maxX = ducks.length > 0 ? Math.max(...ducks.map(d => d.x)) : 0;
+            let maxX = (ducks.length > 0 && raceLogic) ? raceLogic.leaderX : 0;
             let targetCam = maxX - (width * 0.5); // Keep leader at 50% width (Centered)
             targetCam = Math.max(0, Math.min(targetCam, MAP_LENGTH - width));
             cameraX += (targetCam - cameraX) * 0.1;
@@ -1630,7 +1713,8 @@
             let s = Math.floor((elapsed / 1000) % 60);
             let m = Math.floor(elapsed / 60000);
             if (timerElement) {
-                timerElement.innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s) + "." + ms;
+                const text = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s) + "." + ms;
+                if (text !== lastTimerText) { lastTimerText = text; timerElement.innerText = text; }
             }
         }
 
@@ -1647,24 +1731,26 @@
 
         function drawEnvironment(camX) {
             // Draw River Bank (Top)
+            const viewX = Math.floor(camX) - 1, viewW = width + 2;
             ctx.fillStyle = "#4CAF50"; // Green grass
-            ctx.fillRect(0, 0, MAP_LENGTH + 1000, BANK_HEIGHT);
+            ctx.fillRect(viewX, 0, viewW, BANK_HEIGHT);
 
             // Bank Border
             ctx.fillStyle = "#388E3C";
-            ctx.fillRect(0, BANK_HEIGHT - 10, MAP_LENGTH + 1000, 10);
+            ctx.fillRect(viewX, BANK_HEIGHT - 10, viewW, 10);
 
             // Simple Grass Tufts on Bank
             ctx.fillStyle = "#81C784";
-            for (let i = 0; i < MAP_LENGTH; i += 100) {
-                if (i - camX > -100 && i - camX < width + 100) {
-                    ctx.beginPath();
+            ctx.beginPath();
+            for (let i = Math.max(0, Math.floor((camX - 100) / 100) * 100); i < MAP_LENGTH && i - camX < width + 100; i += 100) {
+                if (i - camX > -100) {
                     ctx.moveTo(i, BANK_HEIGHT - 10);
                     ctx.lineTo(i + 10, BANK_HEIGHT - 30);
                     ctx.lineTo(i + 20, BANK_HEIGHT - 10);
-                    ctx.fill();
+                    ctx.closePath();
                 }
             }
+            ctx.fill();
 
             // Draw Finish Line (Checkered Pattern)
             // Use START_LINE + Race Logic Distance (10000)
@@ -1716,8 +1802,8 @@
             }
 
             // Draw Trees on Bank
-            for (let i = 50; i < MAP_LENGTH; i += 200) {
-                if (i - camX > -200 && i - camX < width + 200) {
+            for (let i = 50 + Math.max(0, Math.floor((camX - 300) / 200)) * 200; i < MAP_LENGTH && i - camX < width + 200; i += 200) {
+                if (i - camX > -200) {
                     let treeX = i;
                     let treeY = BANK_HEIGHT - 40;
 
@@ -1787,13 +1873,13 @@
                     // 3. Wood Grain / Texture
                     ctx.strokeStyle = "rgba(0,0,0,0.1)";
                     ctx.lineWidth = 2;
-                    for (let i = 0; i < 3; i++) {
-                        let yOff = (Math.random() - 0.5) * rh * 1.5;
-                        ctx.beginPath();
+                    ctx.beginPath();
+                    for (const g of log.grain) {
+                        let yOff = g[0] * rh * 1.5;
                         ctx.moveTo(-rw + 10, yOff);
-                        ctx.lineTo(rw - 10, yOff + (Math.random() - 0.5) * 5);
-                        ctx.stroke();
+                        ctx.lineTo(rw - 10, yOff + g[1] * 5);
                     }
+                    ctx.stroke();
 
                     // 4. Cut Ends
                     ctx.fillStyle = "#A1887F";
@@ -1854,6 +1940,8 @@
             });
         }
 
+        const WAKE_COLORS = Array.from({ length: 10 }, (_, i) => `rgba(220, 245, 255, ${0.7 - (i * 0.07)})`);
+
         function drawDucks() {
             ducks.forEach(d => {
                 let sx = d.x;
@@ -1882,14 +1970,10 @@
                             let yOff = 18 + Math.sin(t * 1.5) * 3;
 
                             let size = 2.5 + Math.sin(t) * 1;
-                            let alpha = 0.7 - (i * 0.07);
-
-                            if (alpha > 0) {
-                                ctx.fillStyle = `rgba(220, 245, 255, ${alpha})`;
-                                ctx.beginPath();
-                                ctx.arc(xOff, yOff, size, 0, Math.PI * 2);
-                                ctx.fill();
-                            }
+                            ctx.fillStyle = WAKE_COLORS[i];
+                            ctx.beginPath();
+                            ctx.arc(xOff, yOff, size, 0, Math.PI * 2);
+                            ctx.fill();
                         }
                     }
 
@@ -1912,9 +1996,8 @@
 
                     // Adjust box size based on text length
                     ctx.font = "bold 10px Arial";
-                    let textMetrics = ctx.measureText(displayText);
-                    let textWidth = textMetrics.width;
-                    let boxWidth = Math.max(15, textWidth + 6);
+                    if (d.labelW === undefined) d.labelW = Math.max(15, ctx.measureText(displayText).width + 6);
+                    let boxWidth = d.labelW;
 
                     ctx.fillStyle = "white";
                     ctx.fillRect(-30 - boxWidth / 2, -5, boxWidth, 12);
@@ -2028,6 +2111,7 @@
                 gridDiv.className = 'history-grid-container';
 
                 // 1. Render all ducks in this round
+                let boxesHtml = "";
                 group.forEach(d => {
                     let canvasId = `hist-canvas-${d.timestamp}-${Math.floor(Math.random() * 10000) + d.id}`;
 
@@ -2038,7 +2122,7 @@
                             <div class="w-id-tag" style="font-size: 1rem; color: #fff; background: rgba(0,0,0,0.4); padding: 2px 8px; border-radius: 4px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2);">ID: ${d.id || "---"}</div>
                         </div>
                     `;
-                    gridDiv.innerHTML += boxHtml;
+                    boxesHtml += boxHtml;
 
                     // Queue drawing
                     setTimeout(() => {
@@ -2057,6 +2141,7 @@
                         }
                     }, 0);
                 });
+                gridDiv.innerHTML = boxesHtml;
                 historyList.appendChild(gridDiv);
 
                 // 2. Render Shared Prize Info Below
