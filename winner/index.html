@@ -650,6 +650,7 @@
             const games = {
                 'duck': { title: 'Đua Vịt (Duck Race)', icon: 'fa-feather', data: [], color: '#ffeb3b' },
                 'horse': { title: 'Đua Ngựa (Horse Race)', icon: 'fa-horse', data: [], color: '#ff9800' },
+                'mosquito': { title: 'Đập Muỗi', icon: 'fa-bug', data: [], color: '#FFD15A' },
                 'wheel': { title: 'Vòng Quay May Mắn', icon: 'fa-dharmachakra', data: [], color: '#e056fd' },
                 'random': { title: 'Quay Số (Random)', icon: 'fa-dice', data: [], color: '#00e676' }
             };
@@ -658,6 +659,7 @@
                 const gType = (w.gameType || '').toLowerCase();
                 if (gType.includes('vịt')) games.duck.data.push(w);
                 else if (gType.includes('ngựa')) games.horse.data.push(w);
+                else if (gType.includes('muỗi')) games.mosquito.data.push(w);
                 else if (gType.includes('quay số')) games.random.data.push(w);
                 else games.wheel.data.push(w); // Default to Wheel/Ticket
             });

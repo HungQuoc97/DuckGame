@@ -528,6 +528,10 @@
                 <img src="https://cdn-icons-png.flaticon.com/512/2316/2316654.png" class="nav-icon" alt="Horse">
                 <span class="nav-label">Đua Ngựa</span>
             </a>
+            <a href="./Mosquito/index.html" class="nav-item">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg stroke='%2323395B' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cellipse cx='25' cy='19' rx='7' ry='14' fill='%23FFFFFF' transform='rotate%28-28 25 19%29'/%3E%3Cellipse cx='36' cy='17' rx='6.5' ry='13' fill='%23FFFFFF' transform='rotate%2818 36 17%29'/%3E%3Cpath d='M24 41 l-5 9 l-5 3 M31 43 l-1 12 M38 41 l4 9 l5 3' fill='none'/%3E%3Cellipse cx='16' cy='38' rx='12' ry='7' fill='%238FA3D9' transform='rotate%28-14 16 38%29'/%3E%3Cpath d='M11 33 v10 M17 32 v11' stroke-width='2' fill='none'/%3E%3Ccircle cx='31' cy='35' r='8' fill='%238FA3D9'/%3E%3Ccircle cx='42' cy='31' r='8.5' fill='%238FA3D9'/%3E%3Cpath d='M50 35 L61 43' fill='none'/%3E%3Ccircle cx='42' cy='28' r='3.6' fill='%23fff' stroke-width='1.8'/%3E%3Ccircle cx='48.5' cy='29' r='3.6' fill='%23fff' stroke-width='1.8'/%3E%3C/g%3E%3Ccircle cx='43.2' cy='28.6' r='1.6' fill='%2323395B'/%3E%3Ccircle cx='49.7' cy='29.6' r='1.6' fill='%2323395B'/%3E%3C/svg%3E" class="nav-icon" alt="Mosquito">
+                <span class="nav-label">Đập Muỗi</span>
+            </a>
             <!-- Ẩn tạm: chỉ giữ game Đua Ngựa (xóa style="display:none" để hiện lại) -->
             <a href="./Random/ramdom.html" class="nav-item" style="display:none">
                 <img src="https://cdn-icons-png.flaticon.com/512/3571/3571276.png" class="nav-icon" alt="Random">
@@ -912,8 +916,9 @@
             if (!confirm(`Xóa lịch sử ${winners.length} lượt trúng giải và đưa người đã trúng trở lại danh sách tham gia?\n(Danh sách quà giữ nguyên)`)) return -1;
 
             const norm = v => String(v || '').trim();
-            const ids = new Set(participants.map(p => norm(p.id)).filter(Boolean));
-            const names = new Set(participants.map(p => norm(p.name)).filter(Boolean));
+            // Nhận diện theo cặp (Họ tên, Mã NV), không phân biệt thứ tự cột -> người trùng tên khác mã vẫn được đưa về
+            const pairKey = (a, b) => { const x = norm(a), y = norm(b); return x < y ? x + '\u0001' + y : y + '\u0001' + x; };
+            const keys = new Set(participants.map(p => pairKey(p.name, p.id)));
             let restored = 0;
             winners.forEach(w => {
                 let name = norm(w.name), id = norm(w.id);
@@ -922,10 +927,10 @@
                 // Ngựa/Vịt không gắn người tham gia (VD "Ngựa 7", "Vịt #3") => bỏ qua
                 if (!id && /^(Ngựa |Vịt #)\d+$/.test(name)) return;
                 if (!name && !id) return;
-                if (id ? ids.has(id) : names.has(name)) return; // đã có trong danh sách
+                const key = pairKey(name, id);
+                if (keys.has(key)) return; // đã có trong danh sách
                 participants.push({ stt: participants.length + 1, name, id });
-                if (id) ids.add(id);
-                if (name) names.add(name);
+                keys.add(key);
                 restored++;
             });
             localStorage.setItem('lucky_draw_participants', JSON.stringify(participants));
